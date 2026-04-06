@@ -1,6 +1,6 @@
 export const MODELS = [
   {
-    id: 'anthropic/claude-sonnet-4.6',
+    id: 'anthropic/claude-sonnet-4-5',
     label: 'Claude Sonnet 4.6',
     provider: 'Anthropic',
     region: 'United States',
