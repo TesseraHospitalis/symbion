@@ -10,7 +10,7 @@ export const storage = {
     const table = key.startsWith('meta:') ? 'metadata' : 'signals'
     const { error } = await supabase
       .from(table)
-      .upsert({ key, value: JSON.parse(value), shared }, { onConflict: 'key' })
+      .upsert(table === 'metadata' ? { key, value: JSON.parse(value) } : { key, value: JSON.parse(value), shared }, { onConflict: 'key' })
     if (error) throw error
     return { key, value, shared }
   },
