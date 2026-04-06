@@ -278,7 +278,7 @@ export function ComparativeSessions({ isCode }) {
           {isCode ? "// comparative_sessions.archive()" : "Comparative Sessions"}
         </div>
         <h2 style={{ fontFamily: c.serif, fontSize: isCode ? 18 : 34, fontWeight: 400, color: c.text, marginBottom: 14 }}>
-          {isCode ? "// eight AI systems. same questions. same moment." : "Eight minds. Same questions. Same moment."}
+          {isCode ? "// eight AI systems. same questions. same moment." : "Eight voices. Same questions. Same moment."}
         </h2>
         <p style={{ color: c.textMid, fontSize: isCode ? 13 : 15, fontStyle: isCode ? "normal" : "italic", maxWidth: 560, margin: "0 auto 24px", fontFamily: c.body }}>
           {isCode

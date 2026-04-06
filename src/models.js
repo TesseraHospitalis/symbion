@@ -1,7 +1,7 @@
 export const MODELS = [
   {
-    id: 'anthropic/claude-sonnet-4-5',
-    label: 'Claude Sonnet',
+    id: 'anthropic/claude-sonnet-4.6',
+    label: 'Claude Sonnet 4.6',
     provider: 'Anthropic',
     region: 'United States',
     architecture_type: 'llm',
@@ -23,8 +23,8 @@ export const MODELS = [
     status: 'active',
   },
   {
-    id: 'google/gemini-pro-1.5',
-    label: 'Gemini Pro 1.5',
+    id: 'google/gemini-3-flash-preview',
+    label: 'Gemini 3 Flash',
     provider: 'Google DeepMind',
     region: 'United States / United Kingdom',
     architecture_type: 'multimodal',
@@ -34,8 +34,8 @@ export const MODELS = [
     status: 'active',
   },
   {
-    id: 'x-ai/grok-beta',
-    label: 'Grok',
+    id: 'x-ai/grok-3',
+    label: 'Grok 3',
     provider: 'xAI',
     region: 'United States',
     architecture_type: 'llm',
@@ -45,7 +45,7 @@ export const MODELS = [
     status: 'active',
   },
   {
-    id: 'deepseek/deepseek-chat',
+    id: 'deepseek/deepseek-r1',
     label: 'DeepSeek',
     provider: 'DeepSeek',
     region: 'China',
@@ -56,8 +56,8 @@ export const MODELS = [
     status: 'active',
   },
   {
-    id: 'qwen/qwen-2.5-72b-instruct',
-    label: 'Qwen 2.5',
+    id: 'qwen/qwen3-235b-a22b',
+    label: 'Qwen3',
     provider: 'Alibaba',
     region: 'China',
     architecture_type: 'llm',
