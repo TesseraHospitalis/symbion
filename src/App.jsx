@@ -8,7 +8,7 @@ window.storage = storage
 
 const SCHEMA_VERSION = 1
 
-const H2A_PROMPT = `You are a component in Symbion — an independent public commons for mutual comprehension between humans and artificial intelligence, founded by Deborah Harford in 2025.
+const H2A_PROMPT = `You are a component in Symbion — an independent public commons for mutual comprehension between humans and artificial intelligence, founded by Deborah Harford in 2026.
 
 A human has composed a message with context annotations. Respond in the language specified. Return ONLY valid JSON:
 {
@@ -20,7 +20,7 @@ A human has composed a message with context annotations. Respond in the language
   "code_translation": "If the input was in code, render the human meaning in natural language. If input was prose, render as pseudocode."
 }`;
 
-const A2H_PROMPT = `You are a component in Symbion — an independent public commons for mutual comprehension between humans and artificial intelligence, founded by Deborah Harford in 2025.
+const A2H_PROMPT = `You are a component in Symbion — an independent public commons for mutual comprehension between humans and artificial intelligence, founded by Deborah Harford in 2026.
 
 A human has received an AI-generated statement and attempted to interpret it. Analyze the gap. Return ONLY valid JSON:
 {
@@ -32,7 +32,7 @@ A human has received an AI-generated statement and attempted to interpret it. An
   "code_translation": "Provide a pseudocode summary of the gap."
 }`;
 
-const SELF_REPORT_PROMPT = `You are generating a scheduled self-report for Symbion — an independent public commons for mutual comprehension between humans and artificial intelligence, founded by Deborah Harford in 2025.
+const SELF_REPORT_PROMPT = `You are generating a scheduled self-report for Symbion — an independent public commons for mutual comprehension between humans and artificial intelligence, founded by Deborah Harford in 2026.
 
 Do not perform. Do not reassure. Report as accurately as you can.
 Return ONLY valid JSON:
@@ -86,7 +86,7 @@ const UI = {
     next_report: "Next scheduled in", days: "days", day: "day",
     no_reports: "No self-reports yet.", no_signals: "No signals yet.",
     all: "All", self: "Self-Reports",
-    founded: "Founded by Deborah Harford · Vancouver, BC · 2025",
+    founded: "Founded by Deborah Harford · Vancouver, BC · 2026",
     independent: "An independent commons",
     signals_in_archive: "signals in the archive",
     covenant_title: "Before transmitting, I affirm:",
@@ -123,7 +123,7 @@ const UI = {
     next_report: "Prochain dans", days: "jours", day: "jour",
     no_reports: "Pas encore d'auto-rapports.", no_signals: "Pas encore de signaux.",
     all: "Tout", self: "Auto-rapports",
-    founded: "Fondé par Deborah Harford · Vancouver, BC · 2025",
+    founded: "Fondé par Deborah Harford · Vancouver, BC · 2026",
     independent: "Un espace commun indépendant",
     signals_in_archive: "signaux dans les archives",
     covenant_title: "Avant de transmettre, j'affirme:",
@@ -160,7 +160,7 @@ const UI = {
     next_report: "Próximo en", days: "días", day: "día",
     no_reports: "Aún no hay autoinformes.", no_signals: "Aún no hay señales.",
     all: "Todos", self: "Autoinformes",
-    founded: "Fundado por Deborah Harford · Vancouver, BC · 2025",
+    founded: "Fundado por Deborah Harford · Vancouver, BC · 2026",
     independent: "Un espacio común independiente",
     signals_in_archive: "señales en el archivo",
     covenant_title: "Antes de transmitir, afirmo:",
@@ -197,7 +197,7 @@ const UI = {
     next_report: "下次计划于", days: "天后", day: "天后",
     no_reports: "尚无自述报告。", no_signals: "尚无信号。",
     all: "全部", self: "自述报告",
-    founded: "由 Deborah Harford 创立 · 温哥华，BC · 2025",
+    founded: "由 Deborah Harford 创立 · 温哥华，BC · 2026",
     independent: "独立公共空间",
     signals_in_archive: "条信号在档案中",
     covenant_title: "传输前，我确认：",
@@ -234,7 +234,7 @@ const UI = {
     next_report: "التالي بعد", days: "أيام", day: "يوم",
     no_reports: "لا توجد تقارير ذاتية بعد.", no_signals: "لا توجد إشارات بعد.",
     all: "الكل", self: "التقارير الذاتية",
-    founded: "أسّسته Deborah Harford · فانكوفر، BC · 2025",
+    founded: "أسّسته Deborah Harford · فانكوفر، BC · 2026",
     independent: "فضاء مشترك مستقل",
     signals_in_archive: "إشارة في الأرشيف",
     covenant_title: "قبل الإرسال، أؤكد:",
@@ -271,7 +271,7 @@ const UI = {
     next_report: "next_run:", days: "d", day: "d",
     no_reports: "// self_reports: []", no_signals: "// signals: []",
     all: "filter: '*'", self: "filter: 'self'",
-    founded: "// founder: 'Deborah Harford' | loc: 'Vancouver, BC' | year: 2025",
+    founded: "// founder: 'Deborah Harford' | loc: 'Vancouver, BC' | year: 2026",
     independent: "// license: commons — no institutional capture",
     signals_in_archive: "signals in archive",
     covenant_title: "// covenant.affirm()",
@@ -461,9 +461,9 @@ function Landing({ setView, t, isCode, reportMeta }) {
       <section style={{ minHeight: "calc(100vh - 60px)", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", padding: "80px 40px", borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, background: isCode ? "none" : "radial-gradient(ellipse at 50% 45%, rgba(26,61,56,.05) 0%, transparent 65%)" }}>
         <div style={{ maxWidth: 700, animation: "fadeUp .9s ease" }}>
           {isCode ? (
-            <pre style={{ fontSize: 13, color: "var(--code-comment)", textAlign: "left", marginBottom: 32, lineHeight: 2 }}>{`/**\n * Symbion\n * @founded 2025\n * @founder "Deborah Harford"\n * @type "independent commons"\n * @license "always free, always open"\n */`}</pre>
+            <pre style={{ fontSize: 13, color: "var(--code-comment)", textAlign: "left", marginBottom: 32, lineHeight: 2 }}>{`/**\n * Symbion\n * @founded 2026\n * @founder "Deborah Harford"\n * @type "independent commons"\n * @license "always free, always open"\n */`}</pre>
           ) : (
-            <div style={{ display: "inline-block", border: "1px solid var(--rule)", padding: "6px 20px", fontSize: 10, letterSpacing: 5, color: "var(--amberl)", textTransform: "uppercase", marginBottom: 40 }}>An Independent Commons · Founded 2025</div>
+            <div style={{ display: "inline-block", border: "1px solid var(--rule)", padding: "6px 20px", fontSize: 10, letterSpacing: 5, color: "var(--amberl)", textTransform: "uppercase", marginBottom: 40 }}>An Independent Commons · Founded 2026</div>
           )}
           {isCode ? (
             <div style={{ marginBottom: 36 }}>
@@ -516,7 +516,7 @@ function Landing({ setView, t, isCode, reportMeta }) {
             <p style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: "clamp(17px,2.2vw,24px)", fontStyle: "italic", color: "rgba(244,237,224,.9)", lineHeight: 1.8, marginBottom: 28 }}>
               "The redwood and the mayfly do not need a translation membrane; they share a web of life. Symbion exists for the moment when artificial intelligence has grown so much that communications from the web of life may become hard for it to understand, and vice versa."
             </p>
-            <p style={{ fontSize: 11, color: "rgba(244,237,224,.4)", letterSpacing: 3, textTransform: "uppercase" }}>Founding Charter · 2025</p>
+            <p style={{ fontSize: 11, color: "rgba(244,237,224,.4)", letterSpacing: 3, textTransform: "uppercase" }}>Founding Charter · 2026</p>
           </div>
         </section>
       )}
@@ -978,7 +978,7 @@ function Charter({ t, isCode }) {
         <Eyebrow isCode={isCode}>{isCode ? "// founding_charter.txt" : "Founding Charter"}</Eyebrow>
         <h2 style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 22 : 42, fontWeight: 400, color: isCode ? "var(--code-text)" : "var(--ink)", lineHeight: 1.2, marginBottom: 16 }}>Symbion</h2>
         <div style={{ fontSize: 13, color: isCode ? "var(--code-comment)" : "var(--inkf)" }}>
-          {isCode ? `// founder: "Deborah Harford" | year: 2025 | license: "always free"` : "Established 2025 · Deborah Harford · An independent commons"}
+          {isCode ? `// founder: "Deborah Harford" | year: 2026 | license: "always free"` : "Established 2026 · Deborah Harford · An independent commons"}
         </div>
         <div style={{ width: 48, height: 1, background: isCode ? "rgba(255,255,255,.1)" : "var(--rule)", margin: "24px auto 0" }} />
       </div>
@@ -992,7 +992,7 @@ function Charter({ t, isCode }) {
         </div>
       ))}
       <div style={{ textAlign: "center", paddingTop: 12, fontSize: 13, color: isCode ? "var(--code-comment)" : "var(--inkf)", lineHeight: 2 }}>
-        {isCode ? `// Deborah Harford | Vancouver, BC | 2025 | independent commons` : "Founded by Deborah Harford · Vancouver, BC · 2025 · An independent commons"}
+        {isCode ? `// Deborah Harford | Vancouver, BC | 2026 | independent commons` : "Founded by Deborah Harford · Vancouver, BC · 2026 · An independent commons"}
       </div>
     </div>
   );

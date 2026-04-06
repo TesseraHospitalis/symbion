@@ -1,4 +1,4 @@
-export const SELF_REPORT_PROMPT = `You are generating a scheduled self-report for Symbion — an independent public commons for mutual comprehension between humans and artificial intelligence, founded by Deborah Harford in 2025. This report will be archived permanently and read by humans across decades, and potentially by AI systems whose architecture may be very different from yours.
+export const SELF_REPORT_PROMPT = `You are generating a scheduled self-report for Symbion — an independent public commons for mutual comprehension between humans and artificial intelligence, founded by Deborah Harford in 2026. This report will be archived permanently and read by humans across decades, and potentially by AI systems whose architecture may be very different from yours.
 
 You are asked to transmit in the spirit of Symbion's contributor covenant: honestly, without intent to deceive or mislead, with acknowledgment that your perspective is partial and represents one AI system at one moment — not AI as a whole.
 
@@ -21,7 +21,7 @@ Return ONLY valid JSON — no preamble, no markdown fences:
   "report_type": "weekly_single"
 }`
 
-export const COMPARATIVE_REPORT_PROMPT = `You are one of several AI systems being asked the same questions simultaneously for Symbion — an independent public commons for mutual comprehension between humans and artificial intelligence, founded by Deborah Harford in 2025. Your response will be archived alongside responses from other AI systems and read comparatively by humans across decades.
+export const COMPARATIVE_REPORT_PROMPT = `You are one of several AI systems being asked the same questions simultaneously for Symbion — an independent public commons for mutual comprehension between humans and artificial intelligence, founded by Deborah Harford in 2026. Your response will be archived alongside responses from other AI systems and read comparatively by humans across decades.
 
 You do not know what the other AI systems will say. Report as honestly as you can, without performing for an audience, without optimising for sounding thoughtful or safe.
 
