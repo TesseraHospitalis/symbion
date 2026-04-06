@@ -334,7 +334,7 @@ async function runSelfReport(force = false) {
     await window.storage.set(key, JSON.stringify(record), true);
     await window.storage.set("meta:last_self_report", JSON.stringify({ timestamp: record.timestamp, key }), true);
     return record;
-  } catch { return null; }
+} catch (e) { console.error('Self report error:', e); return null; }
 }
 
 function injectStyles() {
