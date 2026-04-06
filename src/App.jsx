@@ -1,4 +1,6 @@
+
 import { storage } from './storage.js'
+import { ComparativeSessions, runComparativeSession } from './ComparativeSessions.jsx'
 import { MODELS, DEFAULT_MODEL, getModel } from './models.js'
 import { useState, useEffect, useRef } from "react";
 
@@ -393,6 +395,7 @@ export default function App() {
         {view === "interface" && <Interface lang={lang} t={t} isCode={isCode} />}
         {view === "archive" && <Archive t={t} isCode={isCode} />}
         {view === "self" && <SelfReports t={t} isCode={isCode} reportMeta={reportMeta} setReportMeta={setReportMeta} />}
+            {view === "compare" && <ComparativeSessions isCode={isCode} />}
         {view === "charter" && <Charter t={t} isCode={isCode} />}
         {view === "channels" && <ChannelRegistry t={t} isCode={isCode} />}
       </div>
@@ -409,7 +412,7 @@ function Nav({ view, setView, lang, setLang, t, isCode }) {
         {isCode ? "// symbion.js" : "Symbion"}
       </div>
       <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-        {[["interface",t.interface],["archive",t.archive],["self",t.reports],["channels","Species"],["charter",t.charter]].map(([v, l]) => (
+        {[["interface",t.interface],["archive",t.archive],["self",t.reports],["compare","Compare"],["channels","Species"],["charter",t.charter]].map(([v, l]) => (
           <button key={v} onClick={() => setView(v)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, color: view === v ? (isCode ? "var(--code-green)" : "var(--teal)") : (isCode ? "var(--code-comment)" : "var(--inkf)"), borderBottom: view === v ? `1px solid ${isCode ? "var(--code-green)" : "var(--teal)"}` : "1px solid transparent", paddingBottom: 1, transition: "all .2s" }}>{l}</button>
         ))}
         <div style={{ position: "relative" }}>
