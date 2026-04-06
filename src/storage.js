@@ -21,7 +21,7 @@ export const storage = {
       .from(table)
       .select('value')
       .eq('key', key)
-      .single()
+      .maybeSingle()
     if (error) throw error
     return data ? { key, value: JSON.stringify(data.value), shared } : null
   },
