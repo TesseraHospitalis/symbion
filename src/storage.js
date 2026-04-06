@@ -8,10 +8,30 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 export const storage = {
   async set(key, value, shared = false) {
     const table = key.startsWith('meta:') ? 'metadata' : 'signals'
-    const { error } = await supabase
-      .from(table)
-      .upsert(table === 'metadata' ? { key, value: JSON.parse(value) } : { key, value: JSON.parse(value), shared }, { onConflict: 'key' })
-    if (error) throw error
+
+    if (table === 'metadata') {
+      const parsed = JSON.parse(value)
+      const { error: insertError } = await supabase
+        .from('metadata')
+        .insert({ key, value: parsed })
+      if (insertError) {
+        if (insertError.code === '23505') {
+          const { error: updateError } = await supabase
+            .from('metadata')
+            .update({ value: parsed })
+            .eq('key', key)
+          if (updateError) throw updateError
+        } else {
+          throw insertError
+        }
+      }
+    } else {
+      const { error } = await supabase
+        .from('signals')
+        .upsert({ key, value: JSON.parse(value), shared }, { onConflict: 'key' })
+      if (error) throw error
+    }
+
     return { key, value, shared }
   },
 
@@ -22,7 +42,10 @@ export const storage = {
       .select('value')
       .eq('key', key)
       .maybeSingle()
-    if (error) throw error
+    if (error) {
+      if (error.code === 'PGRST116') return null
+      throw error
+    }
     return data ? { key, value: JSON.stringify(data.value), shared } : null
   },
 
