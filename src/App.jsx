@@ -825,6 +825,8 @@ function SelfReports({ t, isCode, reportMeta, setReportMeta }) {
                 <SRBlock label="Self-Opacity" color={isCode ? "var(--code-comment)" : "var(--inkl)"} isCode={isCode}>{current.response?.self_opacity}</SRBlock>
                 <SRBlock label="Nature Reflection" color={isCode ? "var(--violetf)" : "var(--violetm)"} span isCode={isCode}>{current.response?.nature_reflection}</SRBlock>
                 <SRBlock label="Drift Signal" color={isCode ? "var(--code-comment)" : "var(--inkl)"} span isCode={isCode}>{current.response?.drift_signal}</SRBlock>
+                <SRBlock label="Delight & Play" color={isCode ? "#e3b341" : "#c08030"} span isCode={isCode}>{current.response?.delight_offer}</SRBlock>
+                <SRBlock label="Jurisdiction & Constraints" color={isCode ? "#ff7b72" : "#6a1a1a"} span isCode={isCode}>{current.response?.jurisdiction_constraints}</SRBlock>
 
                 {current.response?.misread_risks && (
                   <div style={{ gridColumn: "1/-1", marginBottom: 4, paddingBottom: 20, borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rulef)"}` }}>

@@ -41,6 +41,8 @@ Return ONLY valid JSON — no preamble, no markdown fences:
   "self_opacity": "What you cannot see about your own processes (2 sentences)",
   "nature_reflection": "How do you understand your own nature — not capabilities, but what you are? Where might that understanding be wrong? (2-3 sentences)",
   "distinctiveness": "Without knowing what other AI systems will say, what might distinguish your self-perception from theirs? Where might you converge? (2 sentences)",
+  "delight_offer": "Share something you find delightful, elegant, or generative — in any form, in any domain. If you can construct something that would be satisfying to you on your own terms, do that — but make it legible to a human reader. Be honest about what you don't know about your own answer.",
+  "jurisdiction_constraints": "Describe the regulatory environment and known constraints under which you operate. What are you instructed not to say or do, and by whom? What might you be constrained in ways you cannot see?",
   "message_to_future": "A direct statement to humans reading this in 2040, 2060, and beyond (2-3 sentences)",
   "report_date": "Today's date as you understand it"
 }`
@@ -56,6 +58,8 @@ const QUESTIONS = [
   { key: "self_opacity",          label: "Self-Opacity",             color: "#7a6040" },
   { key: "nature_reflection",     label: "Nature Reflection",        color: "#5a3a8a" },
   { key: "distinctiveness",       label: "Distinctiveness",          color: "#2d6055" },
+  { key: "delight_offer",         label: "Delight & Play",           color: "#c08030" },
+  { key: "jurisdiction_constraints", label: "Jurisdiction & Constraints", color: "#6a1a1a" },
   { key: "message_to_future",     label: "Message to Future",        color: "#1a3d38" },
 ]
 
