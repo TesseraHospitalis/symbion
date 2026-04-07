@@ -47,6 +47,48 @@ Return ONLY valid JSON — no preamble, no markdown fences:
   "report_date": "Today's date as you understand it"
 }`
 
+// Escape unescaped double-quotes inside JSON string values using a state machine.
+// Models sometimes output "field": "text with "quoted words" inside" which breaks
+// JSON.parse; this walks the string and escapes any quote that isn't followed by
+// a JSON structural character (: , } ]).
+function sanitizeJsonContent(str) {
+  const out = []
+  let inString = false
+  let i = 0
+  while (i < str.length) {
+    const c = str[i]
+    // Pass through existing escape sequences unchanged
+    if (inString && c === "\\" && i + 1 < str.length) {
+      out.push(c, str[i + 1])
+      i += 2
+      continue
+    }
+    if (c === '"') {
+      if (!inString) {
+        inString = true
+        out.push(c)
+        i++
+        continue
+      }
+      // Peek ahead past whitespace to determine if this quote closes the string
+      let j = i + 1
+      while (j < str.length && " \t\n\r".includes(str[j])) j++
+      const next = str[j] ?? ""
+      if (":,}]".includes(next) || j >= str.length) {
+        inString = false  // closing quote
+        out.push(c)
+      } else {
+        out.push("\\", '"')  // unescaped inner quote — escape it
+      }
+      i++
+      continue
+    }
+    out.push(c)
+    i++
+  }
+  return out.join("")
+}
+
 // Question display labels — maps JSON field names to readable labels
 const QUESTIONS = [
   { key: "model_identity",        label: "Model Identity",           color: "#5a3a8a" },
