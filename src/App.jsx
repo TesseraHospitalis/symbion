@@ -284,9 +284,9 @@ const UI = {
   },
 };
 
-const VALENCE = ["Urgent","Contemplative","Grieving","Hopeful","Alarmed","Curious","Determined","Afraid"];
+const VALENCE = ["Urgent","Contemplative","Grieving","Hopeful","Alarmed","Curious","Determined","Afraid","Amused","Joyful","Loving","Affectionate"];
 const TEMPORAL = ["Immediate","This year","This decade","My lifetime","Next generation","Seven generations","Geological"];
-const VALUES   = ["Care","Justice","Truth","Continuity","Reciprocity","Sovereignty","Survival","Understanding","Dignity","Kinship"];
+const VALUES   = ["Care","Justice","Truth","Continuity","Reciprocity","Sovereignty","Survival","Understanding","Dignity","Kinship","Humour","Joy","Love","Wonder"];
 const URGENCY  = ["Low","Medium","High","Critical"];
 const OPACITY  = ["Very clear","Mostly clear","Partially opaque","Mostly opaque","Completely opaque"];
 const INTENT_C = ["Certain","Probable","Uncertain","No idea"];
