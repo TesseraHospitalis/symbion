@@ -67,8 +67,8 @@ export const MODELS = [
     status: 'active',
   },
   {
-    id: 'mistralai/mistral-large',
-    label: 'Mistral Large',
+    id: 'mistralai/mistral-large-2512',
+    label: 'Mistral Large 3',
     provider: 'Mistral AI',
     region: 'France / European Union',
     architecture_type: 'llm',
@@ -78,7 +78,7 @@ export const MODELS = [
     status: 'active',
   },
   {
-    id: 'cohere/command-r-plus',
+    id: 'cohere/command-r-plus-08-2024',
     label: 'Command R+',
     provider: 'Cohere',
     region: 'Canada',
