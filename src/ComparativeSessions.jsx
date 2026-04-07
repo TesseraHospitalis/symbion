@@ -89,13 +89,15 @@ export async function runComparativeSession(force = false) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             model: model.id,
-            max_tokens: 1000,
+            max_tokens: 2000,
             system: COMPARATIVE_PROMPT,
             messages: [{ role: "user", content: `Generate comparative self-report. Session: ${sessionId}. UTC: ${sessionTimestamp}` }],
           }),
         })
         const data = await res.json()
-        const text = (data.content?.map(b => b.text || "").join("") || "").replace(/<think>[\s\S]*?<\/think>/g, "")
+        const rawText = data.content?.map(b => b.text || "").join("") || ""
+        console.log(`[${model.id}] raw response text:`, rawText)
+        const text = rawText.replace(/<think>[\s\S]*?<\/think>/g, "")
         const parsed = JSON.parse(text.replace(/```json|```/g, "").trim())
 
         return {
@@ -114,7 +116,7 @@ export async function runComparativeSession(force = false) {
           timestamp: new Date().toISOString(),
         }
       } catch (e) {
-        console.error(`Comparative report failed for ${model.id}:`, e)
+        console.error(`[${model.id}] comparative report failed:`, e)
         return null
       }
     })
