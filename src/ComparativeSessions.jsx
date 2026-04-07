@@ -95,7 +95,7 @@ export async function runComparativeSession(force = false) {
           }),
         })
         const data = await res.json()
-        const text = data.content?.map(b => b.text || "").join("") || ""
+        const text = (data.content?.map(b => b.text || "").join("") || "").replace(/<think>[\s\S]*?<\/think>/g, "")
         const parsed = JSON.parse(text.replace(/```json|```/g, "").trim())
 
         return {
