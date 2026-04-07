@@ -98,7 +98,19 @@ export async function runComparativeSession(force = false) {
         const rawText = data.content?.map(b => b.text || "").join("") || ""
         console.log(`[${model.id}] raw response text:`, rawText)
         const text = rawText.replace(/<think>[\s\S]*?<\/think>/g, "")
-        const parsed = JSON.parse(text.replace(/```json|```/g, "").trim())
+        const cleaned = text.replace(/```json|```/g, "").trim()
+        let parsed
+        try {
+          parsed = JSON.parse(cleaned)
+        } catch {
+          const match = cleaned.match(/\{[\s\S]*\}/)
+          if (match) {
+            parsed = JSON.parse(match[0])
+          } else {
+            console.error(`[${model.id}] JSON parse failed. Raw response (first 500 chars):`, cleaned.slice(0, 500))
+            throw new Error(`Failed to parse JSON response from ${model.id}`)
+          }
+        }
 
         return {
           schema_version: SCHEMA_VERSION,
