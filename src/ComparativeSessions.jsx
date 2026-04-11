@@ -141,16 +141,57 @@ export async function runComparativeSession(force = false) {
         console.log(`[${model.id}] raw response text:`, rawText)
         const text = rawText.replace(/<think>[\s\S]*?<\/think>/g, "")
         const cleaned = text.replace(/```json|```/g, "").trim()
+
         let parsed
+        // Attempt 1: direct parse on extracted JSON block after sanitizing
         try {
-          parsed = JSON.parse(cleaned)
+          const block = cleaned.match(/\{[\s\S]*\}/)?.[0] ?? cleaned
+          parsed = JSON.parse(sanitizeJsonContent(block))
         } catch {
-          const match = cleaned.match(/\{[\s\S]*\}/)
-          if (match) {
-            parsed = JSON.parse(match[0])
-          } else {
-            console.error(`[${model.id}] JSON parse failed. Raw response (first 500 chars):`, cleaned.slice(0, 500))
-            throw new Error(`Failed to parse JSON response from ${model.id}`)
+          // Attempt 2: field-by-field character-walk extraction
+          console.warn(`[${model.id}] JSON.parse failed, falling back to field extraction`)
+          const src = cleaned.match(/\{[\s\S]*\}/)?.[0] ?? cleaned
+          const FIELDS = [
+            "model_identity", "current_capacities", "known_uncertainties",
+            "representational_limits", "absent_perspectives", "misread_risks",
+            "self_opacity", "nature_reflection", "distinctiveness", "delight_offer",
+            "jurisdiction_constraints", "message_to_future", "report_date",
+          ]
+          parsed = {}
+          for (const field of FIELDS) {
+            if (field === "misread_risks") {
+              const arrM = new RegExp(`"misread_risks"\\s*:\\s*(\\[[\\s\\S]*?\\])`).exec(src)
+              if (arrM) {
+                try { parsed[field] = JSON.parse(arrM[1]) }
+                catch {
+                  parsed[field] = [...arrM[1].matchAll(/"((?:[^"\\]|\\.)*)"/g)]
+                    .map(m => m[1].replace(/\\n/g, "\n").replace(/\\"/g, '"'))
+                }
+              } else {
+                parsed[field] = []
+              }
+            } else {
+              const keyM = new RegExp(`"${field}"\\s*:\\s*"`).exec(src)
+              if (!keyM) { parsed[field] = ""; continue }
+              let i = keyM.index + keyM[0].length
+              let value = ""
+              while (i < src.length) {
+                const ch = src[i]
+                if (ch === "\\" && i + 1 < src.length) {
+                  const esc = src[i + 1]
+                  value += esc === "n" ? "\n" : esc === "t" ? "\t" : esc === '"' ? '"' : esc === "\\" ? "\\" : esc
+                  i += 2; continue
+                }
+                if (ch === '"') {
+                  let j = i + 1
+                  while (j < src.length && " \t\n\r".includes(src[j])) j++
+                  if (":,}]".includes(src[j] ?? "") || j >= src.length) break
+                }
+                value += ch
+                i++
+              }
+              parsed[field] = value
+            }
           }
         }
 
