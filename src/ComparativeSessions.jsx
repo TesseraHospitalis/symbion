@@ -552,6 +552,14 @@ export function ComparativeSessions({ isCode }) {
                             </div>
                           ))}
                         </div>
+                      ) : answer && typeof answer === "object" ? (
+                        <div>
+                          {Object.values(answer).map((val, i) => (
+                            <p key={i} style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.8, fontFamily: c.body, marginBottom: 8 }}>
+                              {val}
+                            </p>
+                          ))}
+                        </div>
                       ) : selectedQuestion === "message_to_future" ? (
                         <p style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 12 : 15, fontStyle: isCode ? "normal" : "italic", color: c.text, lineHeight: 1.8 }}>
                           {answer || "—"}
