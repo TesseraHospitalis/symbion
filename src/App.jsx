@@ -962,7 +962,7 @@ function Archive({ t, isCode }) {
           <div style={{ display: "grid", gridTemplateColumns: "110px auto 1fr 18px", gap: 14, padding: "18px 0", alignItems: "start" }}>
             <div>
               <div style={{ fontSize: 11, color: s.mode === "h2a" ? (isCode ? "var(--code-blue)" : "var(--amberl)") : s.mode === "a2h" ? (isCode ? "var(--code-green)" : "var(--tealm)") : (isCode ? "var(--violetf)" : "var(--violetm)"), marginBottom: 3 }}>
-                {s.mode === "h2a" ? t.h2a : s.mode === "a2h" ? t.a2h : t.self}
+                {s.mode === "h2a" ? t.h2a : s.mode === "a2h" ? t.a2h : s.mode === "comparative" ? (t.comparative || "Comparative") : t.self}
               </div>
               <div style={{ fontSize: 10, color: isCode ? "var(--code-comment)" : "var(--inkf)" }}>{new Date(s.timestamp).toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" })}</div>
               {s.model_label && <div style={{ fontSize: 10, color: isCode ? "var(--code-comment)" : "var(--inkf)", marginTop: 2 }}>{s.model_label}</div>}
@@ -970,7 +970,7 @@ function Archive({ t, isCode }) {
             <div style={{ width: 1, background: isCode ? "rgba(48,54,61,1)" : "var(--rulef)", alignSelf: "stretch" }} />
             <div>
               <p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-text)" : "var(--ink)", lineHeight: 1.6, marginBottom: 6 }}>
-                {(() => { const text = s.mode === "self" ? s.response?.message_to_future : s.mode === "h2a" ? s.message : s.aiText; return selected === i ? `"${text}"` : `"${text?.slice(0, 110)}…"`; })()}
+                {(() => { const text = s.mode === "h2a" ? s.message : s.mode === "a2h" ? s.aiText : s.mode === "self" ? s.response?.message_to_future : s.mode === "comparative" ? s.response?.model_identity : (s.response?.message_to_future || s.response?.model_identity || "Signal archived"); return selected === i ? `"${text}"` : `"${text?.slice(0, 110)}…"`; })()}
               </p>
               <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                 {s.mode === "h2a" && <><Chip small color={isCode ? "var(--code-blue)" : "var(--amberl)"} isCode={isCode}>{s.valence}</Chip><Chip small color={isCode ? "var(--code-green)" : "var(--tealm)"} isCode={isCode}>{s.temporal}</Chip>{s.values?.map(v => <Chip key={v} small color={isCode ? "var(--code-comment)" : "var(--inkf)"} isCode={isCode}>{v}</Chip>)}</>}
@@ -995,6 +995,12 @@ function Archive({ t, isCode }) {
                   <AL color={isCode ? "var(--code-comment)" : "rgba(244,237,224,.5)"} isCode={isCode}>Message to Future</AL>
                   <p style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 12 : 15, fontStyle: isCode ? "normal" : "italic", color: isCode ? "var(--code-text)" : "rgba(244,237,224,.9)", lineHeight: 1.8 }}>{s.response.message_to_future}</p>
                 </div>
+              </div>}
+              {s.mode === "comparative" && <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+                <div style={{ gridColumn: "1/-1" }}><AL color={isCode ? "var(--code-green)" : "var(--violetm)"} isCode={isCode}>Model Identity</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-text)" : "var(--ink)", lineHeight: 1.7 }}>{s.response.model_identity}</p></div>
+                {s.response.current_capacities && <div><AL color={isCode ? "var(--code-blue)" : "var(--tealm)"} isCode={isCode}>Current Capacities</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7 }}>{s.response.current_capacities}</p></div>}
+                {s.response.known_uncertainties && <div><AL color={isCode ? "var(--code-comment)" : "var(--inkl)"} isCode={isCode}>Known Uncertainties</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7 }}>{s.response.known_uncertainties}</p></div>}
+                {s.response.delight_offer && <div style={{ gridColumn: "1/-1" }}><AL color={isCode ? "#e3b341" : "#c08030"} isCode={isCode}>Delight &amp; Play</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7 }}>{s.response.delight_offer}</p></div>}
               </div>}
             </div>
           )}
