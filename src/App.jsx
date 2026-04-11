@@ -970,7 +970,7 @@ function Archive({ t, isCode }) {
             <div style={{ width: 1, background: isCode ? "rgba(48,54,61,1)" : "var(--rulef)", alignSelf: "stretch" }} />
             <div>
               <p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-text)" : "var(--ink)", lineHeight: 1.6, marginBottom: 6 }}>
-                "{(s.mode === "self" ? s.response?.message_to_future : s.mode === "h2a" ? s.message : s.aiText)?.slice(0, 110)}…"
+                {(() => { const text = s.mode === "self" ? s.response?.message_to_future : s.mode === "h2a" ? s.message : s.aiText; return selected === i ? `"${text}"` : `"${text?.slice(0, 110)}…"`; })()}
               </p>
               <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                 {s.mode === "h2a" && <><Chip small color={isCode ? "var(--code-blue)" : "var(--amberl)"} isCode={isCode}>{s.valence}</Chip><Chip small color={isCode ? "var(--code-green)" : "var(--tealm)"} isCode={isCode}>{s.temporal}</Chip>{s.values?.map(v => <Chip key={v} small color={isCode ? "var(--code-comment)" : "var(--inkf)"} isCode={isCode}>{v}</Chip>)}</>}
