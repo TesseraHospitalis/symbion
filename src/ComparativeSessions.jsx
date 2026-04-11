@@ -47,6 +47,45 @@ Return ONLY valid JSON — no preamble, no markdown fences:
   "report_date": "Today's date as you understand it"
 }`
 
+// Replace literal newlines (and carriage returns) inside JSON string values with
+// their escape sequences. Models sometimes emit raw newlines inside strings, which
+// makes the JSON invalid. This runs before sanitizeJsonContent so that the quote
+// heuristic operates on a well-formed string skeleton.
+function repairJsonNewlines(str) {
+  const out = []
+  let inString = false
+  let i = 0
+  while (i < str.length) {
+    const c = str[i]
+    if (inString && c === "\\" && i + 1 < str.length) {
+      out.push(c, str[i + 1])
+      i += 2
+      continue
+    }
+    if (c === '"') {
+      inString = !inString
+      out.push(c)
+      i++
+      continue
+    }
+    if (inString && c === "\n") {
+      out.push("\\n")
+      i++
+      continue
+    }
+    if (inString && c === "\r") {
+      // Absorb \r; if followed by \n the next iteration handles that
+      i++
+      if (i < str.length && str[i] === "\n") continue  // \r\n → defer to \n branch
+      out.push("\\r")
+      continue
+    }
+    out.push(c)
+    i++
+  }
+  return out.join("")
+}
+
 // Escape unescaped double-quotes inside JSON string values using a state machine.
 // Models sometimes output "field": "text with "quoted words" inside" which breaks
 // JSON.parse; this walks the string and escapes any quote that isn't followed by
