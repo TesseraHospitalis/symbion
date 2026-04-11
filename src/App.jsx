@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 window.storage = storage
 
 const SCHEMA_VERSION = 1
+const FOUNDING_PASSPHRASE = 'membrane'
 
 const H2A_PROMPT = `You are a component in Symbion — an independent public commons for mutual comprehension between humans and artificial intelligence, founded by Deborah Harford in 2026.
 
@@ -434,6 +435,62 @@ function Nav({ view, setView, lang, setLang, t, isCode }) {
   );
 }
 
+function PassphraseGate({ isCode, onUnlock }) {
+  const [value, setValue] = useState('');
+  const [rejected, setRejected] = useState(false);
+
+  const attempt = () => {
+    if (value.trim().toLowerCase() === FOUNDING_PASSPHRASE) {
+      sessionStorage.setItem('symbion_unlocked', '1');
+      onUnlock();
+    } else {
+      setRejected(true);
+      setValue('');
+    }
+  };
+
+  const borderColor = isCode ? 'rgba(255,255,255,.1)' : 'var(--rule)';
+  const bg = isCode ? '#0d1117' : 'var(--pd)';
+
+  return (
+    <div style={{ maxWidth: 520, margin: '0 auto', padding: '56px 32px', border: `1px solid ${borderColor}`, borderRadius: 4, background: bg, textAlign: 'center', animation: 'fadeUp .6s ease' }}>
+      <div style={{ fontSize: isCode ? 11 : 10, letterSpacing: isCode ? 0 : 4, color: isCode ? 'var(--code-comment)' : 'var(--amberl)', textTransform: isCode ? 'none' : 'uppercase', marginBottom: 24 }}>
+        {isCode ? '// access: founding_period' : 'Founding Period'}
+      </div>
+      <p style={{ fontSize: isCode ? 13 : 16, fontFamily: isCode ? 'monospace' : "'Playfair Display',Georgia,serif", color: isCode ? 'var(--code-text)' : 'var(--teal)', lineHeight: 1.75, marginBottom: 16, fontStyle: isCode ? 'normal' : 'italic' }}>
+        {isCode ? '// Symbion is in its founding period.' : 'Symbion is in its founding period.'}
+      </p>
+      <p style={{ fontSize: isCode ? 12 : 14, lineHeight: 1.85, color: isCode ? 'var(--code-comment)' : 'var(--inkl)', marginBottom: 32, fontStyle: isCode ? 'normal' : 'italic' }}>
+        {isCode
+          ? '// Contributors receive access by invitation. Enter your passphrase to continue.'
+          : 'Contributors receive access by invitation. If you have been invited, enter your passphrase to continue.'}
+      </p>
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <input
+          type="password"
+          value={value}
+          onChange={e => { setValue(e.target.value); setRejected(false); }}
+          onKeyDown={e => e.key === 'Enter' && attempt()}
+          placeholder={isCode ? '// passphrase' : 'Passphrase'}
+          autoFocus
+          style={{ background: isCode ? '#161b22' : 'var(--p)', color: isCode ? 'var(--code-text)' : 'var(--ink)', border: `1px solid ${rejected ? (isCode ? 'var(--redl)' : 'var(--redl)') : borderColor}`, padding: '9px 14px', fontSize: 14, borderRadius: 2, width: 200, fontFamily: isCode ? 'monospace' : 'inherit', outline: 'none' }}
+        />
+        <button
+          onClick={attempt}
+          style={{ background: isCode ? 'rgba(126,231,135,.1)' : 'var(--teal)', color: isCode ? 'var(--code-green)' : 'var(--p)', border: `1px solid ${isCode ? 'var(--code-green)' : 'var(--teal)'}`, padding: '9px 20px', fontSize: 14, cursor: 'pointer', borderRadius: 2, fontFamily: isCode ? 'monospace' : 'inherit', transition: 'all .2s' }}
+        >
+          {isCode ? 'enter()' : 'Enter'}
+        </button>
+      </div>
+      {rejected && (
+        <p style={{ marginTop: 14, fontSize: 12, color: isCode ? 'var(--redl)' : 'var(--redl)', fontFamily: isCode ? 'monospace' : 'inherit' }}>
+          {isCode ? '// ERROR: incorrect passphrase' : 'That passphrase is not recognised.'}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function Covenant({ t, isCode, onAgree }) {
   const [checked, setChecked] = useState(false);
   return (
@@ -532,7 +589,17 @@ function Landing({ setView, t, isCode, reportMeta }) {
 function Interface({ lang, t, isCode }) {
   const [mode, setMode] = useState("h2a");
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL.id);
+  const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem('symbion_unlocked') === '1');
   const currentModel = getModel(selectedModel);
+
+  if (!unlocked) {
+    return (
+      <div style={{ maxWidth: 1140, margin: "0 auto", padding: "80px 32px" }}>
+        <PassphraseGate isCode={isCode} onUnlock={() => setUnlocked(true)} />
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: 1140, margin: "0 auto", padding: "60px 32px" }}>
       <div style={{ textAlign: "center", marginBottom: 44 }}>

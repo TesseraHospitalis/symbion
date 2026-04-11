@@ -88,6 +88,17 @@ export const MODELS = [
     comparative: true,
     status: 'active',
   },
+  {
+    id: 'pending/anthropic-mythos',
+    label: 'Claude Mythos',
+    provider: 'Anthropic',
+    region: 'United States',
+    architecture_type: 'llm',
+    protocol: 'openrouter',
+    description: 'Anthropic\'s most capable model to date, announced April 2026 as part of Project Glasswing. Operates at a level of cybersecurity capability that exceeds human expert performance — finding and chaining zero-day vulnerabilities across every major operating system. Not publicly available. When accessible, its self-characterisation at this capability level would be one of the most significant entries in the comparative archive. Watch for public release.',
+    comparative: false,
+    status: 'instrument-pending',
+  },
 ]
 
 export const DEFAULT_MODEL = MODELS.find(m => m.default)
