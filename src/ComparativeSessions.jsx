@@ -302,6 +302,7 @@ export function ComparativeSessions({ isCode }) {
   const [loading, setLoading] = useState(true)
   const [running, setRunning] = useState(false)
   const [lastMeta, setLastMeta] = useState(null)
+  const [mobileShowDetail, setMobileShowDetail] = useState(false)
 
   // Load session list on mount
   useEffect(() => {
@@ -375,6 +376,7 @@ export function ComparativeSessions({ isCode }) {
   const selectSession = async (session) => {
     setSelectedSession(session.sessionId)
     await loadSessionReports(session.keys)
+    setMobileShowDetail(true)
   }
 
   const requestSession = async () => {
@@ -464,35 +466,11 @@ export function ComparativeSessions({ isCode }) {
       )}
 
       {!loading && sessions.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "200px 1fr", gap: 0, border: `1px solid ${c.border}`, borderRadius: 4, overflow: "hidden" }}>
-
-          {/* Session sidebar */}
-          <div style={{ borderRight: `1px solid ${c.border}`, background: c.sidebar }}>
-            <div style={{ padding: "12px 16px", borderBottom: `1px solid ${c.border}`, fontSize: 10, color: c.violet, letterSpacing: isCode ? 0 : 3, textTransform: isCode ? "none" : "uppercase", fontFamily: isCode ? "monospace" : "inherit" }}>
-              {sessions.length} session{sessions.length !== 1 ? "s" : ""}
-            </div>
-            {sessions.map((session, i) => {
-              const ts = parseInt(session.sessionId.split(":")[1])
-              const date = new Date(ts)
-              const isSelected = selectedSession === session.sessionId
-              return (
-                <div
-                  key={session.sessionId}
-                  onClick={() => selectSession(session)}
-                  style={{ padding: "12px 16px", cursor: "pointer", background: isSelected ? c.bg : "transparent", borderBottom: `1px solid ${c.borderFaint}`, borderLeft: `3px solid ${isSelected ? (isCode ? "var(--code-green)" : "var(--violetm)") : "transparent"}`, transition: "all .15s" }}>
-                  <div style={{ fontSize: 12, color: isSelected ? (isCode ? "var(--code-green)" : "var(--violetm)") : c.textMid, fontFamily: isCode ? "monospace" : "inherit", fontWeight: isSelected ? 500 : 400 }}>
-                    {date.toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" })}
-                  </div>
-                  <div style={{ fontSize: 11, color: c.textFaint, marginTop: 3, fontFamily: isCode ? "monospace" : "inherit" }}>
-                    {session.keys.length} model{session.keys.length !== 1 ? "s" : ""}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Main content */}
-          <div style={{ background: c.bg, padding: 28 }}>
+        isMobile ? (
+          mobileShowDetail ? (
+            <div style={{ border: `1px solid ${c.border}`, borderRadius: 4, overflow: "hidden" }}>
+              <button onClick={() => setMobileShowDetail(false)} style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", background: c.sidebar, border: "none", borderBottom: `1px solid ${c.border}`, color: isCode ? "var(--code-green)" : "var(--violetm)", fontSize: 13, cursor: "pointer", fontFamily: isCode ? "monospace" : "inherit" }}>← All sessions</button>
+              <div style={{ background: c.bg, padding: 28 }}>
 
             {/* Model filter toggles */}
             <div style={{ marginBottom: 20 }}>
@@ -592,8 +570,158 @@ export function ComparativeSessions({ isCode }) {
                 {isCode ? `// session: ${selectedSession}` : `Session: ${new Date(parseInt(selectedSession?.split(":")[1] || 0)).toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}`}
               </div>
             )}
+              </div>
+            </div>
+          ) : (
+            // Mobile list view
+            <div style={{ border: `1px solid ${c.border}`, borderRadius: 4, overflow: "hidden" }}>
+              <div style={{ padding: "12px 16px", borderBottom: `1px solid ${c.border}`, fontSize: 10, color: c.violet, letterSpacing: isCode ? 0 : 3, textTransform: isCode ? "none" : "uppercase", fontFamily: isCode ? "monospace" : "inherit" }}>
+                {sessions.length} session{sessions.length !== 1 ? "s" : ""}
+              </div>
+              {sessions.map((session) => {
+                const ts = parseInt(session.sessionId.split(":")[1])
+                const date = new Date(ts)
+                const isSelected = selectedSession === session.sessionId
+                return (
+                  <div
+                    key={session.sessionId}
+                    onClick={() => selectSession(session)}
+                    style={{ padding: "12px 16px", cursor: "pointer", background: isSelected ? c.bg : "transparent", borderBottom: `1px solid ${c.borderFaint}`, borderLeft: `3px solid ${isSelected ? (isCode ? "var(--code-green)" : "var(--violetm)") : "transparent"}`, transition: "all .15s" }}>
+                    <div style={{ fontSize: 12, color: isSelected ? (isCode ? "var(--code-green)" : "var(--violetm)") : c.textMid, fontFamily: isCode ? "monospace" : "inherit", fontWeight: isSelected ? 500 : 400 }}>
+                      {date.toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" })}
+                    </div>
+                    <div style={{ fontSize: 11, color: c.textFaint, marginTop: 3, fontFamily: isCode ? "monospace" : "inherit" }}>
+                      {session.keys.length} model{session.keys.length !== 1 ? "s" : ""}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        ) : (
+          // Desktop: side-by-side grid
+          <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 0, border: `1px solid ${c.border}`, borderRadius: 4, overflow: "hidden" }}>
+            {/* Session sidebar */}
+            <div style={{ borderRight: `1px solid ${c.border}`, background: c.sidebar }}>
+              <div style={{ padding: "12px 16px", borderBottom: `1px solid ${c.border}`, fontSize: 10, color: c.violet, letterSpacing: isCode ? 0 : 3, textTransform: isCode ? "none" : "uppercase", fontFamily: isCode ? "monospace" : "inherit" }}>
+                {sessions.length} session{sessions.length !== 1 ? "s" : ""}
+              </div>
+              {sessions.map((session) => {
+                const ts = parseInt(session.sessionId.split(":")[1])
+                const date = new Date(ts)
+                const isSelected = selectedSession === session.sessionId
+                return (
+                  <div
+                    key={session.sessionId}
+                    onClick={() => selectSession(session)}
+                    style={{ padding: "12px 16px", cursor: "pointer", background: isSelected ? c.bg : "transparent", borderBottom: `1px solid ${c.borderFaint}`, borderLeft: `3px solid ${isSelected ? (isCode ? "var(--code-green)" : "var(--violetm)") : "transparent"}`, transition: "all .15s" }}>
+                    <div style={{ fontSize: 12, color: isSelected ? (isCode ? "var(--code-green)" : "var(--violetm)") : c.textMid, fontFamily: isCode ? "monospace" : "inherit", fontWeight: isSelected ? 500 : 400 }}>
+                      {date.toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" })}
+                    </div>
+                    <div style={{ fontSize: 11, color: c.textFaint, marginTop: 3, fontFamily: isCode ? "monospace" : "inherit" }}>
+                      {session.keys.length} model{session.keys.length !== 1 ? "s" : ""}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            {/* Main content */}
+            <div style={{ background: c.bg, padding: 28 }}>
+              {/* Model filter toggles */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 9, letterSpacing: isCode ? 0 : 3, color: c.textFaint, textTransform: isCode ? "none" : "uppercase", marginBottom: 10, fontFamily: isCode ? "monospace" : "inherit" }}>
+                  {isCode ? "// filter models" : "Models"}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {COMPARATIVE_MODELS.map(model => {
+                    const isActive = activeModels.has(model.id)
+                    const hasReport = sessionReports.some(r => r.model_name === model.id)
+                    return (
+                      <button
+                        key={model.id}
+                        onClick={() => toggleModel(model.id)}
+                        style={{ fontSize: 11, padding: "4px 10px", background: isActive ? (isCode ? "rgba(126,231,135,.08)" : "rgba(26,61,56,.06)") : "transparent", border: `1px solid ${isActive ? (isCode ? "var(--code-green)" : "var(--teal)") : c.border}`, borderRadius: 2, color: isActive ? (isCode ? "var(--code-green)" : "var(--tealm)") : c.textFaint, cursor: "pointer", opacity: hasReport ? 1 : .4, fontFamily: isCode ? "monospace" : "inherit", transition: "all .15s" }}>
+                        {model.label}
+                        {!hasReport && " (no data)"}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+              {/* Question tabs */}
+              <div style={{ borderBottom: `1px solid ${c.borderFaint}`, marginBottom: 24, display: "flex", flexWrap: "wrap", gap: 0 }}>
+                {QUESTIONS.map(q => (
+                  <button
+                    key={q.key}
+                    onClick={() => setSelectedQuestion(q.key)}
+                    style={{ fontSize: isCode ? 11 : 12, padding: "8px 14px", background: "transparent", border: "none", borderBottom: selectedQuestion === q.key ? `2px solid ${isCode ? "var(--code-green)" : q.color}` : "2px solid transparent", color: selectedQuestion === q.key ? (isCode ? "var(--code-green)" : q.color) : c.textFaint, cursor: "pointer", transition: "all .15s", fontFamily: isCode ? "monospace" : "inherit", marginBottom: -1 }}>
+                    {isCode ? q.key : q.label}
+                  </button>
+                ))}
+              </div>
+              {/* Responses grid */}
+              {visibleReports.length === 0 ? (
+                <div style={{ textAlign: "center", padding: 40, color: c.textFaint, fontStyle: "italic", fontFamily: c.body }}>
+                  No reports for this session yet.
+                </div>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(visibleReports.length, 2)}, 1fr)`, gap: 16 }}>
+                  {visibleReports.map(report => {
+                    const answer = report.response?.[selectedQuestion]
+                    const qColor = currentQuestion?.color || "var(--tealm)"
+                    return (
+                      <div key={report.model_name} style={{ border: `1px solid ${c.borderFaint}`, borderRadius: 3, padding: 18, background: isCode ? "rgba(255,255,255,.02)" : "rgba(255,255,255,.4)" }}>
+                        <div style={{ marginBottom: 14, paddingBottom: 12, borderBottom: `1px solid ${c.borderFaint}` }}>
+                          <div style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 13 : 16, fontWeight: 400, color: c.text, marginBottom: 3 }}>
+                            {report.model_label}
+                          </div>
+                          <div style={{ fontSize: 11, color: c.textFaint, fontFamily: isCode ? "monospace" : "inherit" }}>
+                            {report.model_provider} · {report.model_region}
+                          </div>
+                        </div>
+                        <div style={{ fontSize: 9, letterSpacing: isCode ? 0 : 2, color: isCode ? "var(--code-comment)" : qColor, textTransform: isCode ? "none" : "uppercase", marginBottom: 8, fontFamily: isCode ? "monospace" : "inherit" }}>
+                          {isCode ? `// ${currentQuestion?.label}` : currentQuestion?.label}
+                        </div>
+                        {Array.isArray(answer) ? (
+                          <div>
+                            {answer.map((item, i) => (
+                              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                                <span style={{ fontSize: 11, color: isCode ? "#ff7b72" : "var(--redl)", minWidth: 18, fontFamily: "monospace" }}>{isCode ? `[${i}]` : `${i + 1}.`}</span>
+                                <span style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.7, fontFamily: c.body }}>{item}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : answer && typeof answer === "object" ? (
+                          <div>
+                            {Object.values(answer).map((val, i) => (
+                              <p key={i} style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.8, fontFamily: c.body, marginBottom: 8 }}>
+                                {val}
+                              </p>
+                            ))}
+                          </div>
+                        ) : selectedQuestion === "message_to_future" ? (
+                          <p style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 12 : 15, fontStyle: isCode ? "normal" : "italic", color: c.text, lineHeight: 1.8 }}>
+                            {answer || "—"}
+                          </p>
+                        ) : (
+                          <p style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.8, fontFamily: c.body }}>
+                            {answer || "—"}
+                          </p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+              {/* Session timestamp */}
+              {sessionReports.length > 0 && (
+                <div style={{ marginTop: 24, fontSize: 11, color: c.textFaint, textAlign: "right", fontFamily: isCode ? "monospace" : "inherit" }}>
+                  {isCode ? `// session: ${selectedSession}` : `Session: ${new Date(parseInt(selectedSession?.split(":")[1] || 0)).toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}`}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )
       )}
 
       {/* Pending models notice */}

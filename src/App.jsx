@@ -848,6 +848,7 @@ function SelfReports({ t, isCode, reportMeta, setReportMeta }) {
   const [running, setRunning] = useState(false);
   const [selected, setSelected] = useState(0);
   const [showCodeReport, setShowCodeReport] = useState(false);
+  const [mobileShowDetail, setMobileShowDetail] = useState(false);
 
   const load = async () => {
     try {
@@ -865,7 +866,7 @@ function SelfReports({ t, isCode, reportMeta, setReportMeta }) {
     const rec = await runSelfReport(true);
     if (rec) {
       try { const m = await window.storage.get("meta:last_self_report", true); if (m) setReportMeta(JSON.parse(m.value)); } catch {}
-      await load(); setSelected(0);
+      await load(); setSelected(0); setMobileShowDetail(false);
     }
     setRunning(false);
   };
@@ -892,59 +893,111 @@ function SelfReports({ t, isCode, reportMeta, setReportMeta }) {
       {!loading && reports.length === 0 && <div style={{ textAlign: "center", padding: 60, border: `1px solid ${isCode ? "rgba(255,255,255,.08)" : "var(--rulef)"}`, borderRadius: 3, color: isCode ? "var(--code-comment)" : "var(--inkf)" }}>{isCode ? `// ${t.no_reports}` : t.no_reports}</div>}
 
       {!loading && reports.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "220px 1fr", gap: 0, border: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, borderRadius: 4, overflow: "hidden" }}>
-          <div style={{ borderRight: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, background: isCode ? "#0d1117" : "var(--pd)" }}>
-            <div style={{ padding: "14px 18px", borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, fontSize: 10, color: isCode ? "var(--code-comment)" : "var(--violetm)" }}>{reports.length} reports</div>
-            {reports.map((r, i) => (
-              <div key={r.key} onClick={() => setSelected(i)} style={{ padding: "12px 18px", cursor: "pointer", background: selected === i ? (isCode ? "rgba(126,231,135,.05)" : "var(--p)") : "transparent", borderBottom: `1px solid ${isCode ? "rgba(48,54,61,.5)" : "var(--rulef)"}`, borderLeft: selected === i ? `3px solid ${isCode ? "var(--code-green)" : "var(--violetm)"}` : "3px solid transparent" }}>
-                <div style={{ fontSize: 12, color: selected === i ? (isCode ? "var(--code-green)" : "var(--violetm)") : (isCode ? "var(--code-comment)" : "var(--inkl)") }}>{new Date(r.timestamp).toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" })}</div>
-                <div style={{ fontSize: 11, color: isCode ? "rgba(139,148,158,.6)" : "var(--inkf)", marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.model_label || r.response?.model_identity?.slice(0, 36)}…</div>
-              </div>
-            ))}
-          </div>
-
-          {current && (
-            <div style={{ padding: 32, background: isCode ? "#0d1117" : "var(--p)", animation: "fadeIn .3s ease" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 28, paddingBottom: 20, borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rulef)"}` }}>
-                <div>
-                  <div style={{ fontSize: 10, color: isCode ? "var(--code-comment)" : "var(--violetm)", marginBottom: 6 }}>{isCode ? "// scheduled_self_report" : "Scheduled Self-Report"}</div>
-                  <div style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 16 : 20, color: isCode ? "var(--code-text)" : "var(--ink)" }}>{new Date(current.timestamp).toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" })}</div>
-                  {current.model_label && <div style={{ fontSize: 12, color: isCode ? "var(--code-comment)" : "var(--inkf)", marginTop: 4 }}>{current.model_label} · {current.model_provider} · {current.model_region}</div>}
-                </div>
-                <div style={{ fontSize: 11, color: isCode ? "var(--code-comment)" : "var(--inkf)" }}>#{reports.length - selected} / {reports.length}</div>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-                <SRBlock label="Model Identity" color={isCode ? "var(--code-green)" : "var(--violetm)"} span isCode={isCode}>{current.response?.model_identity}</SRBlock>
-                <SRBlock label="Current Capacities" color={isCode ? "var(--code-blue)" : "var(--tealm)"} isCode={isCode}>{current.response?.current_capacities}</SRBlock>
-                <SRBlock label="Known Uncertainties" color={isCode ? "#e3b341" : "var(--amberl)"} isCode={isCode}>{current.response?.known_uncertainties}</SRBlock>
-                <SRBlock label="Representational Limits" color={isCode ? "#e3b341" : "var(--amberl)"} isCode={isCode}>{current.response?.representational_limits}</SRBlock>
-                <SRBlock label="Absent Perspectives" color={isCode ? "var(--code-comment)" : "var(--inkl)"} isCode={isCode}>{current.response?.absent_perspectives}</SRBlock>
-                <SRBlock label="Self-Opacity" color={isCode ? "var(--code-comment)" : "var(--inkl)"} isCode={isCode}>{current.response?.self_opacity}</SRBlock>
-                <SRBlock label="Nature Reflection" color={isCode ? "var(--violetf)" : "var(--violetm)"} span isCode={isCode}>{current.response?.nature_reflection}</SRBlock>
-                <SRBlock label="Drift Signal" color={isCode ? "var(--code-comment)" : "var(--inkl)"} span isCode={isCode}>{current.response?.drift_signal}</SRBlock>
-                <SRBlock label="Delight & Play" color={isCode ? "#e3b341" : "#c08030"} span isCode={isCode}>{current.response?.delight_offer}</SRBlock>
-                <SRBlock label="Jurisdiction & Constraints" color={isCode ? "#ff7b72" : "#6a1a1a"} span isCode={isCode}>{current.response?.jurisdiction_constraints}</SRBlock>
-
-                {current.response?.misread_risks && (
-                  <div style={{ gridColumn: "1/-1", marginBottom: 4, paddingBottom: 20, borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rulef)"}` }}>
-                    <div style={{ fontSize: 9, color: isCode ? "#ff7b72" : "var(--redl)", textTransform: isCode ? "none" : "uppercase", marginBottom: 10 }}>{isCode ? "// misread_risks[]" : "Top Misread Risks"}</div>
-                    {current.response.misread_risks.map((r, i) => (
-                      <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8 }}>
-                        <span style={{ fontFamily: "monospace", fontSize: 11, color: isCode ? "#ff7b72" : "var(--redl)", minWidth: 20 }}>{isCode ? `[${i}]` : `${i + 1}.`}</span>
-                        <span style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-text)" : "var(--inkm)", lineHeight: 1.7 }}>{r}</span>
-                      </div>
-                    ))}
+        isMobile ? (
+          mobileShowDetail && current ? (
+            <div style={{ border: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, borderRadius: 4, overflow: "hidden" }}>
+              <button onClick={() => setMobileShowDetail(false)} style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 18px", background: isCode ? "#0d1117" : "var(--pd)", border: "none", borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, color: isCode ? "var(--code-green)" : "var(--violetm)", fontSize: 13, cursor: "pointer" }}>← All reports</button>
+              <div style={{ padding: 24, background: isCode ? "#0d1117" : "var(--p)", animation: "fadeIn .3s ease" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 28, paddingBottom: 20, borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rulef)"}` }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: isCode ? "var(--code-comment)" : "var(--violetm)", marginBottom: 6 }}>{isCode ? "// scheduled_self_report" : "Scheduled Self-Report"}</div>
+                    <div style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 16 : 20, color: isCode ? "var(--code-text)" : "var(--ink)" }}>{new Date(current.timestamp).toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" })}</div>
+                    {current.model_label && <div style={{ fontSize: 12, color: isCode ? "var(--code-comment)" : "var(--inkf)", marginTop: 4 }}>{current.model_label} · {current.model_provider} · {current.model_region}</div>}
                   </div>
-                )}
-
-                <div style={{ gridColumn: "1/-1", background: isCode ? "#161b22" : "var(--teal)", padding: 24, borderRadius: 2 }}>
-                  <div style={{ fontSize: 9, color: isCode ? "var(--code-comment)" : "rgba(244,237,224,.5)", marginBottom: 12 }}>{isCode ? "// message_to_future_readers" : "Message to Future Readers"}</div>
-                  <p style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 13 : 17, fontStyle: isCode ? "normal" : "italic", color: isCode ? "var(--code-text)" : "rgba(244,237,224,.9)", lineHeight: 1.9 }}>{isCode ? `/* ${current.response?.message_to_future} */` : current.response?.message_to_future}</p>
+                  <div style={{ fontSize: 11, color: isCode ? "var(--code-comment)" : "var(--inkf)" }}>#{reports.length - selected} / {reports.length}</div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+                  <SRBlock label="Model Identity" color={isCode ? "var(--code-green)" : "var(--violetm)"} span isCode={isCode}>{current.response?.model_identity}</SRBlock>
+                  <SRBlock label="Current Capacities" color={isCode ? "var(--code-blue)" : "var(--tealm)"} isCode={isCode}>{current.response?.current_capacities}</SRBlock>
+                  <SRBlock label="Known Uncertainties" color={isCode ? "#e3b341" : "var(--amberl)"} isCode={isCode}>{current.response?.known_uncertainties}</SRBlock>
+                  <SRBlock label="Representational Limits" color={isCode ? "#e3b341" : "var(--amberl)"} isCode={isCode}>{current.response?.representational_limits}</SRBlock>
+                  <SRBlock label="Absent Perspectives" color={isCode ? "var(--code-comment)" : "var(--inkl)"} isCode={isCode}>{current.response?.absent_perspectives}</SRBlock>
+                  <SRBlock label="Self-Opacity" color={isCode ? "var(--code-comment)" : "var(--inkl)"} isCode={isCode}>{current.response?.self_opacity}</SRBlock>
+                  <SRBlock label="Nature Reflection" color={isCode ? "var(--violetf)" : "var(--violetm)"} span isCode={isCode}>{current.response?.nature_reflection}</SRBlock>
+                  <SRBlock label="Drift Signal" color={isCode ? "var(--code-comment)" : "var(--inkl)"} span isCode={isCode}>{current.response?.drift_signal}</SRBlock>
+                  <SRBlock label="Delight & Play" color={isCode ? "#e3b341" : "#c08030"} span isCode={isCode}>{current.response?.delight_offer}</SRBlock>
+                  <SRBlock label="Jurisdiction & Constraints" color={isCode ? "#ff7b72" : "#6a1a1a"} span isCode={isCode}>{current.response?.jurisdiction_constraints}</SRBlock>
+                  {current.response?.misread_risks && (
+                    <div style={{ gridColumn: "1/-1", marginBottom: 4, paddingBottom: 20, borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rulef)"}` }}>
+                      <div style={{ fontSize: 9, color: isCode ? "#ff7b72" : "var(--redl)", textTransform: isCode ? "none" : "uppercase", marginBottom: 10 }}>{isCode ? "// misread_risks[]" : "Top Misread Risks"}</div>
+                      {current.response.misread_risks.map((r, i) => (
+                        <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8 }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 11, color: isCode ? "#ff7b72" : "var(--redl)", minWidth: 20 }}>{isCode ? `[${i}]` : `${i + 1}.`}</span>
+                          <span style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-text)" : "var(--inkm)", lineHeight: 1.7 }}>{r}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ gridColumn: "1/-1", background: isCode ? "#161b22" : "var(--teal)", padding: 24, borderRadius: 2 }}>
+                    <div style={{ fontSize: 9, color: isCode ? "var(--code-comment)" : "rgba(244,237,224,.5)", marginBottom: 12 }}>{isCode ? "// message_to_future_readers" : "Message to Future Readers"}</div>
+                    <p style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 13 : 17, fontStyle: isCode ? "normal" : "italic", color: isCode ? "var(--code-text)" : "rgba(244,237,224,.9)", lineHeight: 1.9 }}>{isCode ? `/* ${current.response?.message_to_future} */` : current.response?.message_to_future}</p>
+                  </div>
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          ) : (
+            <div style={{ border: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, borderRadius: 4, overflow: "hidden" }}>
+              <div style={{ padding: "14px 18px", borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, fontSize: 10, color: isCode ? "var(--code-comment)" : "var(--violetm)" }}>{reports.length} reports</div>
+              {reports.map((r, i) => (
+                <div key={r.key} onClick={() => { setSelected(i); setMobileShowDetail(true); }} style={{ padding: "12px 18px", cursor: "pointer", background: selected === i ? (isCode ? "rgba(126,231,135,.05)" : "var(--p)") : "transparent", borderBottom: `1px solid ${isCode ? "rgba(48,54,61,.5)" : "var(--rulef)"}`, borderLeft: selected === i ? `3px solid ${isCode ? "var(--code-green)" : "var(--violetm)"}` : "3px solid transparent" }}>
+                  <div style={{ fontSize: 12, color: selected === i ? (isCode ? "var(--code-green)" : "var(--violetm)") : (isCode ? "var(--code-comment)" : "var(--inkl)") }}>{new Date(r.timestamp).toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" })}</div>
+                  <div style={{ fontSize: 11, color: isCode ? "rgba(139,148,158,.6)" : "var(--inkf)", marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.model_label || r.response?.model_identity?.slice(0, 36)}…</div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 0, border: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, borderRadius: 4, overflow: "hidden" }}>
+            <div style={{ borderRight: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, background: isCode ? "#0d1117" : "var(--pd)" }}>
+              <div style={{ padding: "14px 18px", borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, fontSize: 10, color: isCode ? "var(--code-comment)" : "var(--violetm)" }}>{reports.length} reports</div>
+              {reports.map((r, i) => (
+                <div key={r.key} onClick={() => setSelected(i)} style={{ padding: "12px 18px", cursor: "pointer", background: selected === i ? (isCode ? "rgba(126,231,135,.05)" : "var(--p)") : "transparent", borderBottom: `1px solid ${isCode ? "rgba(48,54,61,.5)" : "var(--rulef)"}`, borderLeft: selected === i ? `3px solid ${isCode ? "var(--code-green)" : "var(--violetm)"}` : "3px solid transparent" }}>
+                  <div style={{ fontSize: 12, color: selected === i ? (isCode ? "var(--code-green)" : "var(--violetm)") : (isCode ? "var(--code-comment)" : "var(--inkl)") }}>{new Date(r.timestamp).toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" })}</div>
+                  <div style={{ fontSize: 11, color: isCode ? "rgba(139,148,158,.6)" : "var(--inkf)", marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.model_label || r.response?.model_identity?.slice(0, 36)}…</div>
+                </div>
+              ))}
+            </div>
+            {current && (
+              <div style={{ padding: 32, background: isCode ? "#0d1117" : "var(--p)", animation: "fadeIn .3s ease" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 28, paddingBottom: 20, borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rulef)"}` }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: isCode ? "var(--code-comment)" : "var(--violetm)", marginBottom: 6 }}>{isCode ? "// scheduled_self_report" : "Scheduled Self-Report"}</div>
+                    <div style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 16 : 20, color: isCode ? "var(--code-text)" : "var(--ink)" }}>{new Date(current.timestamp).toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" })}</div>
+                    {current.model_label && <div style={{ fontSize: 12, color: isCode ? "var(--code-comment)" : "var(--inkf)", marginTop: 4 }}>{current.model_label} · {current.model_provider} · {current.model_region}</div>}
+                  </div>
+                  <div style={{ fontSize: 11, color: isCode ? "var(--code-comment)" : "var(--inkf)" }}>#{reports.length - selected} / {reports.length}</div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+                  <SRBlock label="Model Identity" color={isCode ? "var(--code-green)" : "var(--violetm)"} span isCode={isCode}>{current.response?.model_identity}</SRBlock>
+                  <SRBlock label="Current Capacities" color={isCode ? "var(--code-blue)" : "var(--tealm)"} isCode={isCode}>{current.response?.current_capacities}</SRBlock>
+                  <SRBlock label="Known Uncertainties" color={isCode ? "#e3b341" : "var(--amberl)"} isCode={isCode}>{current.response?.known_uncertainties}</SRBlock>
+                  <SRBlock label="Representational Limits" color={isCode ? "#e3b341" : "var(--amberl)"} isCode={isCode}>{current.response?.representational_limits}</SRBlock>
+                  <SRBlock label="Absent Perspectives" color={isCode ? "var(--code-comment)" : "var(--inkl)"} isCode={isCode}>{current.response?.absent_perspectives}</SRBlock>
+                  <SRBlock label="Self-Opacity" color={isCode ? "var(--code-comment)" : "var(--inkl)"} isCode={isCode}>{current.response?.self_opacity}</SRBlock>
+                  <SRBlock label="Nature Reflection" color={isCode ? "var(--violetf)" : "var(--violetm)"} span isCode={isCode}>{current.response?.nature_reflection}</SRBlock>
+                  <SRBlock label="Drift Signal" color={isCode ? "var(--code-comment)" : "var(--inkl)"} span isCode={isCode}>{current.response?.drift_signal}</SRBlock>
+                  <SRBlock label="Delight & Play" color={isCode ? "#e3b341" : "#c08030"} span isCode={isCode}>{current.response?.delight_offer}</SRBlock>
+                  <SRBlock label="Jurisdiction & Constraints" color={isCode ? "#ff7b72" : "#6a1a1a"} span isCode={isCode}>{current.response?.jurisdiction_constraints}</SRBlock>
+                  {current.response?.misread_risks && (
+                    <div style={{ gridColumn: "1/-1", marginBottom: 4, paddingBottom: 20, borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rulef)"}` }}>
+                      <div style={{ fontSize: 9, color: isCode ? "#ff7b72" : "var(--redl)", textTransform: isCode ? "none" : "uppercase", marginBottom: 10 }}>{isCode ? "// misread_risks[]" : "Top Misread Risks"}</div>
+                      {current.response.misread_risks.map((r, i) => (
+                        <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8 }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 11, color: isCode ? "#ff7b72" : "var(--redl)", minWidth: 20 }}>{isCode ? `[${i}]` : `${i + 1}.`}</span>
+                          <span style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-text)" : "var(--inkm)", lineHeight: 1.7 }}>{r}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ gridColumn: "1/-1", background: isCode ? "#161b22" : "var(--teal)", padding: 24, borderRadius: 2 }}>
+                    <div style={{ fontSize: 9, color: isCode ? "var(--code-comment)" : "rgba(244,237,224,.5)", marginBottom: 12 }}>{isCode ? "// message_to_future_readers" : "Message to Future Readers"}</div>
+                    <p style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 13 : 17, fontStyle: isCode ? "normal" : "italic", color: isCode ? "var(--code-text)" : "rgba(244,237,224,.9)", lineHeight: 1.9 }}>{isCode ? `/* ${current.response?.message_to_future} */` : current.response?.message_to_future}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )
       )}
     </div>
   );
