@@ -21,6 +21,16 @@
 import { useState, useEffect } from "react"
 import { COMPARATIVE_MODELS, DEFAULT_MODEL } from "./models.js"
 
+function useWindowSize() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return { isMobile };
+}
+
 const MONTHLY_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000
 const SCHEMA_VERSION = 1
 
@@ -283,6 +293,7 @@ export async function runComparativeSession(force = false) {
 // ── Compare page UI ───────────────────────────────────────────────────────────
 
 export function ComparativeSessions({ isCode }) {
+  const { isMobile } = useWindowSize();
   const [sessions, setSessions] = useState([])      // list of session IDs
   const [selectedSession, setSelectedSession] = useState(null)
   const [sessionReports, setSessionReports] = useState([])  // reports for selected session
@@ -453,7 +464,7 @@ export function ComparativeSessions({ isCode }) {
       )}
 
       {!loading && sessions.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 0, border: `1px solid ${c.border}`, borderRadius: 4, overflow: "hidden" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "200px 1fr", gap: 0, border: `1px solid ${c.border}`, borderRadius: 4, overflow: "hidden" }}>
 
           {/* Session sidebar */}
           <div style={{ borderRight: `1px solid ${c.border}`, background: c.sidebar }}>
@@ -523,7 +534,7 @@ export function ComparativeSessions({ isCode }) {
                 No reports for this session yet.
               </div>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(visibleReports.length, 2)}, 1fr)`, gap: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : `repeat(${Math.min(visibleReports.length, 2)}, 1fr)`, gap: 16 }}>
                 {visibleReports.map(report => {
                   const answer = report.response?.[selectedQuestion]
                   const qColor = currentQuestion?.color || "var(--tealm)"

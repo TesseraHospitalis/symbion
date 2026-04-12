@@ -4,6 +4,16 @@ import { ComparativeSessions, runComparativeSession } from './ComparativeSession
 import { MODELS, DEFAULT_MODEL, getModel } from './models.js'
 import { useState, useEffect, useRef } from "react";
 
+function useWindowSize() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return { isMobile };
+}
+
 window.storage = storage
 
 const SCHEMA_VERSION = 1
@@ -406,19 +416,35 @@ export default function App() {
 
 function Nav({ view, setView, lang, setLang, t, isCode }) {
   const [langOpen, setLangOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { isMobile } = useWindowSize();
   const bg = isCode ? "rgba(13,17,23,.97)" : "rgba(244,237,224,.97)";
+  const navLinks = [["interface",t.interface],["archive",t.archive],["self",t.reports],["compare","Compare Models"],["channels","Species"],["charter",t.charter]];
   return (
     <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, height: 60, background: bg, backdropFilter: "blur(10px)", borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px" }}>
       <div onClick={() => setView("landing")} style={{ cursor: "pointer", fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-green)" : "var(--teal)", textTransform: isCode ? "none" : "uppercase", letterSpacing: isCode ? 0 : 2 }}>
         {isCode ? "// symbion.js" : "Symbion"}
       </div>
       <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-        {[["interface",t.interface],["archive",t.archive],["self",t.reports],["compare","Compare"],["channels","Species"],["charter",t.charter]].map(([v, l]) => (
-          <button key={v} onClick={() => setView(v)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, color: view === v ? (isCode ? "var(--code-green)" : "var(--teal)") : (isCode ? "var(--code-comment)" : "var(--inkf)"), borderBottom: view === v ? `1px solid ${isCode ? "var(--code-green)" : "var(--teal)"}` : "1px solid transparent", paddingBottom: 1, transition: "all .2s" }}>{l}</button>
-        ))}
+        {isMobile ? (
+          <div style={{ position: "relative" }}>
+            <button onClick={() => setMenuOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22, color: isCode ? "var(--code-text)" : "var(--teal)", lineHeight: 1, padding: "0 4px" }}>☰</button>
+            {menuOpen && (
+              <div style={{ position: "absolute", right: 0, top: "calc(100% + 6px)", background: isCode ? "#161b22" : "var(--p)", border: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, borderRadius: 3, zIndex: 200, minWidth: 200, boxShadow: "0 4px 20px rgba(0,0,0,.15)" }}>
+                {navLinks.map(([v, l]) => (
+                  <button key={v} onClick={() => { setView(v); setMenuOpen(false); }} style={{ display: "block", width: "100%", textAlign: "left", background: view === v ? (isCode ? "rgba(126,231,135,.1)" : "rgba(26,61,56,.06)") : "transparent", border: "none", borderBottom: `1px solid ${isCode ? "rgba(48,54,61,.5)" : "var(--rulef)"}`, padding: "12px 16px", cursor: "pointer", fontSize: 13, color: view === v ? (isCode ? "var(--code-green)" : "var(--teal)") : (isCode ? "var(--code-text)" : "var(--inkl)") }}>{l}</button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          navLinks.map(([v, l]) => (
+            <button key={v} onClick={() => setView(v)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, color: view === v ? (isCode ? "var(--code-green)" : "var(--teal)") : (isCode ? "var(--code-comment)" : "var(--inkf)"), borderBottom: view === v ? `1px solid ${isCode ? "var(--code-green)" : "var(--teal)"}` : "1px solid transparent", paddingBottom: 1, transition: "all .2s" }}>{l}</button>
+          ))
+        )}
         <div style={{ position: "relative" }}>
           <button onClick={() => setLangOpen(o => !o)} style={{ background: isCode ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)", border: `1px solid ${isCode ? "rgba(255,255,255,.1)" : "var(--rule)"}`, padding: "4px 10px", cursor: "pointer", fontSize: 13, color: isCode ? "var(--code-text)" : "var(--inkl)", borderRadius: 2 }}>
-            {LANGUAGES[lang]?.flag} {LANGUAGES[lang]?.name}
+            {LANGUAGES[lang]?.flag} {isMobile ? "" : LANGUAGES[lang]?.name}
           </button>
           {langOpen && (
             <div style={{ position: "absolute", right: 0, top: "calc(100% + 6px)", background: isCode ? "#161b22" : "var(--p)", border: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, borderRadius: 3, zIndex: 200, minWidth: 160, boxShadow: "0 4px 20px rgba(0,0,0,.15)" }}>
@@ -511,6 +537,7 @@ function Covenant({ t, isCode, onAgree }) {
 }
 
 function Landing({ setView, t, isCode, reportMeta }) {
+  const { isMobile } = useWindowSize();
   const nextReport = reportMeta ? new Date(new Date(reportMeta.timestamp).getTime() + SELF_REPORT_INTERVAL_MS) : null;
   const daysUntil = nextReport ? Math.max(0, Math.ceil((nextReport - Date.now()) / 86400000)) : null;
   return (
@@ -552,13 +579,13 @@ function Landing({ setView, t, isCode, reportMeta }) {
 
       <section style={{ maxWidth: 1000, margin: "0 auto", padding: "80px 40px" }}>
         <Eyebrow isCode={isCode}>Three Channels</Eyebrow>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 36, marginTop: 40 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)", gap: 36, marginTop: 40 }}>
           {[
             { color: isCode ? "var(--code-blue)" : "var(--amberl)", dir: t.h2a, title: "Being heard", body: "Humans annotate what plain text cannot carry. The membrane translates across the speed and representational gap." },
             { color: isCode ? "var(--code-green)" : "var(--tealm)", dir: t.a2h, title: "Being understood", body: "AI output parsed by humans. Uncertainty annotated. The gap between intent and interpretation mapped and archived." },
             { color: isCode ? "var(--violetf)" : "var(--violetm)", dir: isCode ? "ai.self_report()" : "AI Self-Report", title: "Self-characterization", body: "Weekly, AI systems file unprompted reports on their capacities, limits, and misread risks. A longitudinal record across model generations." },
           ].map(c => (
-            <div key={c.title} style={{ borderTop: `2px solid ${c.color}`, paddingTop: 22 }}>
+            <div key={c.title} style={{ borderTop: `2px solid ${c.color}`, paddingTop: 22, textAlign: isMobile ? "left" : "inherit" }}>
               <div style={{ fontSize: 10, letterSpacing: isCode ? 0 : 4, color: c.color, textTransform: isCode ? "none" : "uppercase", marginBottom: 10 }}>{c.dir}</div>
               <h3 style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 14 : 20, fontWeight: 400, color: isCode ? "var(--code-text)" : "var(--ink)", marginBottom: 10 }}>{isCode ? `// ${c.title}` : c.title}</h3>
               <p style={{ fontSize: isCode ? 12 : 14, lineHeight: 1.85, color: isCode ? "var(--code-comment)" : "var(--inkl)" }}>{isCode ? `/* ${c.body} */` : c.body}</p>
@@ -633,6 +660,7 @@ function Interface({ lang, t, isCode }) {
 }
 
 function H2AInterface({ lang, t, isCode, selectedModel }) {
+  const { isMobile } = useWindowSize();
   const [covenantSigned, setCovenantSigned] = useState(false);
   const [message, setMessage] = useState("");
   const [inputMode, setInputMode] = useState("prose");
@@ -680,8 +708,8 @@ function H2AInterface({ lang, t, isCode, selectedModel }) {
   };
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 52px 1fr", alignItems: "start" }}>
-      <Panel label={t.express} color={isCode ? "var(--code-blue)" : "var(--amber)"} side="left" isCode={isCode}>
+    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 52px 1fr", alignItems: "start" }}>
+      <Panel label={t.express} color={isCode ? "var(--code-blue)" : "var(--amber)"} side={isMobile ? "solo" : "left"} isCode={isCode}>
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           <Anno label={t.mode_label} color={isCode ? "var(--code-blue)" : "var(--amberl)"}>
             <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
@@ -700,8 +728,8 @@ function H2AInterface({ lang, t, isCode, selectedModel }) {
           <Anno label={t.urgency} color={isCode ? "var(--code-blue)" : "var(--amberl)"}><Chips opts={URGENCY} sel={[urgency]} toggle={setUrgency} single accent={isCode ? "var(--code-blue)" : "var(--amber)"} isCode={isCode} /></Anno>
         </div>
       </Panel>
-      <MembraneBar loading={loading} active={!!message.trim()} onTransmit={transmit} accentColor={isCode ? "var(--code-green)" : "var(--amberl)"} isCode={isCode} />
-      <Panel label={t.ai_translation} color={isCode ? "var(--code-green)" : "var(--teal)"} side="right" isCode={isCode}>
+      <MembraneBar loading={loading} active={!!message.trim()} onTransmit={transmit} accentColor={isCode ? "var(--code-green)" : "var(--amberl)"} isCode={isCode} isMobile={isMobile} />
+      <Panel label={t.ai_translation} color={isCode ? "var(--code-green)" : "var(--teal)"} side={isMobile ? "solo" : "right"} isCode={isCode}>
         {!response && !loading && !error && <EmptyState text={isCode ? `// ${t.awaiting}` : t.awaiting} isCode={isCode} />}
         {error && <ErrorMsg isCode={isCode}>{error}</ErrorMsg>}
         {response && (
@@ -728,6 +756,7 @@ function H2AInterface({ lang, t, isCode, selectedModel }) {
 }
 
 function A2HInterface({ lang, t, isCode, selectedModel }) {
+  const { isMobile } = useWindowSize();
   const [covenantSigned, setCovenantSigned] = useState(false);
   const [aiText, setAiText] = useState("");
   const [humanReading, setHumanReading] = useState("");
@@ -772,8 +801,8 @@ function A2HInterface({ lang, t, isCode, selectedModel }) {
   };
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 52px 1fr", alignItems: "start" }}>
-      <Panel label={t.ai_statement} color={isCode ? "var(--code-green)" : "var(--teal)"} side="left" isCode={isCode}>
+    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 52px 1fr", alignItems: "start" }}>
+      <Panel label={t.ai_statement} color={isCode ? "var(--code-green)" : "var(--teal)"} side={isMobile ? "solo" : "left"} isCode={isCode}>
         <textarea value={aiText} onChange={e => setAiText(e.target.value)} placeholder={t.paste_ai}
           style={{ width: "100%", minHeight: 120, background: isCode ? "rgba(0,0,0,.3)" : "rgba(26,61,56,.04)", border: `1px solid ${isCode ? "rgba(255,255,255,.1)" : "rgba(26,61,56,.2)"}`, borderRadius: 2, color: isCode ? "var(--code-text)" : "var(--ink)", padding: 12, fontSize: 15, lineHeight: 1.7, resize: "vertical", boxSizing: "border-box" }} />
         <div style={{ marginTop: 16 }}>
@@ -787,8 +816,8 @@ function A2HInterface({ lang, t, isCode, selectedModel }) {
           <Anno label={t.concern} color={isCode ? "var(--code-green)" : "var(--tealm)"}><Chips opts={CONCERN} sel={[concern]} toggle={setConcern} single accent={isCode ? "var(--code-green)" : "var(--teal)"} isCode={isCode} /></Anno>
         </div>
       </Panel>
-      <MembraneBar loading={loading} active={!!(aiText.trim() && humanReading.trim())} onTransmit={transmit} accentColor={isCode ? "var(--code-green)" : "var(--teal)"} rtl isCode={isCode} />
-      <Panel label={t.gap_analysis} color={isCode ? "var(--code-green)" : "var(--teal)"} side="right" isCode={isCode}>
+      <MembraneBar loading={loading} active={!!(aiText.trim() && humanReading.trim())} onTransmit={transmit} accentColor={isCode ? "var(--code-green)" : "var(--teal)"} rtl isCode={isCode} isMobile={isMobile} />
+      <Panel label={t.gap_analysis} color={isCode ? "var(--code-green)" : "var(--teal)"} side={isMobile ? "solo" : "right"} isCode={isCode}>
         {!response && !loading && !error && <EmptyState text={isCode ? `// ${t.interpreting}` : t.interpreting} isCode={isCode} />}
         {error && <ErrorMsg isCode={isCode}>{error}</ErrorMsg>}
         {response && (
@@ -813,6 +842,7 @@ function A2HInterface({ lang, t, isCode, selectedModel }) {
 }
 
 function SelfReports({ t, isCode, reportMeta, setReportMeta }) {
+  const { isMobile } = useWindowSize();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
@@ -862,7 +892,7 @@ function SelfReports({ t, isCode, reportMeta, setReportMeta }) {
       {!loading && reports.length === 0 && <div style={{ textAlign: "center", padding: 60, border: `1px solid ${isCode ? "rgba(255,255,255,.08)" : "var(--rulef)"}`, borderRadius: 3, color: isCode ? "var(--code-comment)" : "var(--inkf)" }}>{isCode ? `// ${t.no_reports}` : t.no_reports}</div>}
 
       {!loading && reports.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 0, border: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, borderRadius: 4, overflow: "hidden" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "220px 1fr", gap: 0, border: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, borderRadius: 4, overflow: "hidden" }}>
           <div style={{ borderRight: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, background: isCode ? "#0d1117" : "var(--pd)" }}>
             <div style={{ padding: "14px 18px", borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, fontSize: 10, color: isCode ? "var(--code-comment)" : "var(--violetm)" }}>{reports.length} reports</div>
             {reports.map((r, i) => (
@@ -921,6 +951,7 @@ function SelfReports({ t, isCode, reportMeta, setReportMeta }) {
 }
 
 function Archive({ t, isCode }) {
+  const { isMobile } = useWindowSize();
   const [signals, setSignals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
@@ -959,7 +990,7 @@ function Archive({ t, isCode }) {
 
       {!loading && filtered.map((s, i) => (
         <div key={s.key} style={{ borderTop: `1px solid ${isCode ? "rgba(48,54,61,.7)" : "var(--rulef)"}`, cursor: "pointer" }} onClick={() => setSelected(selected === i ? null : i)}>
-          <div style={{ display: "grid", gridTemplateColumns: "110px auto 1fr 18px", gap: 14, padding: "18px 0", alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "110px auto 1fr 18px", gap: isMobile ? 8 : 14, padding: "18px 0", alignItems: "start" }}>
             <div>
               <div style={{ fontSize: 11, color: s.mode === "h2a" ? (isCode ? "var(--code-blue)" : "var(--amberl)") : s.mode === "a2h" ? (isCode ? "var(--code-green)" : "var(--tealm)") : (isCode ? "var(--violetf)" : "var(--violetm)"), marginBottom: 3 }}>
                 {s.mode === "h2a" ? t.h2a : s.mode === "a2h" ? t.a2h : s.mode === "comparative" ? (t.comparative || "Comparative") : t.self}
@@ -981,22 +1012,22 @@ function Archive({ t, isCode }) {
           </div>
           {selected === i && s.response && (
             <div style={{ paddingBottom: 24, borderTop: `1px solid ${isCode ? "rgba(48,54,61,.5)" : "var(--rulef)"}`, paddingTop: 18, animation: "fadeIn .3s ease" }}>
-              {s.mode === "h2a" && <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+              {s.mode === "h2a" && <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 18 }}>
                 <div><AL color={isCode ? "var(--code-green)" : "var(--tealm)"} isCode={isCode}>Bridge Phrase</AL><p style={{ fontSize: isCode ? 13 : 15, fontStyle: isCode ? "normal" : "italic", color: isCode ? "var(--code-text)" : "var(--ink)", lineHeight: 1.7 }}>{s.response.bridge_phrase}</p></div>
                 <div><AL color={isCode ? "var(--code-blue)" : "var(--amberl)"} isCode={isCode}>What May Be Lost</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7 }}>{s.response.uncertainty}</p></div>
               </div>}
-              {s.mode === "a2h" && <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+              {s.mode === "a2h" && <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 18 }}>
                 <div><AL color={isCode ? "var(--code-green)" : "var(--tealm)"} isCode={isCode}>Gap Analysis</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7 }}>{s.response.gap_analysis}</p></div>
                 <div><AL color={isCode ? "#ff7b72" : "var(--redl)"} isCode={isCode}>Risk if Unaddressed</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7 }}>{s.response.risk_assessment}</p></div>
               </div>}
-              {s.mode === "self" && <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+              {s.mode === "self" && <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 18 }}>
                 <div><AL color={isCode ? "var(--code-green)" : "var(--tealm)"} isCode={isCode}>Known Uncertainties</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7 }}>{s.response.known_uncertainties}</p></div>
                 <div style={{ gridColumn: "1/-1", background: isCode ? "#161b22" : "var(--teal)", padding: 16, borderRadius: 2 }}>
                   <AL color={isCode ? "var(--code-comment)" : "rgba(244,237,224,.5)"} isCode={isCode}>Message to Future</AL>
                   <p style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 12 : 15, fontStyle: isCode ? "normal" : "italic", color: isCode ? "var(--code-text)" : "rgba(244,237,224,.9)", lineHeight: 1.8 }}>{s.response.message_to_future}</p>
                 </div>
               </div>}
-              {s.mode === "comparative" && <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+              {s.mode === "comparative" && <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 18 }}>
                 <div style={{ gridColumn: "1/-1" }}><AL color={isCode ? "var(--code-green)" : "var(--violetm)"} isCode={isCode}>Model Identity</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-text)" : "var(--ink)", lineHeight: 1.7 }}>{s.response.model_identity}</p></div>
                 {s.response.current_capacities && <div><AL color={isCode ? "var(--code-blue)" : "var(--tealm)"} isCode={isCode}>Current Capacities</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7 }}>{s.response.current_capacities}</p></div>}
                 {s.response.known_uncertainties && <div><AL color={isCode ? "var(--code-comment)" : "var(--inkl)"} isCode={isCode}>Known Uncertainties</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7 }}>{s.response.known_uncertainties}</p></div>}
@@ -1078,8 +1109,20 @@ function Eyebrow({ children, isCode }) { return <div style={{ fontSize: isCode ?
 function PrimaryBtn({ onClick, children, isCode, disabled }) { return <button onClick={onClick} disabled={disabled} style={{ background: isCode ? (disabled ? "rgba(126,231,135,.05)" : "rgba(126,231,135,.1)") : "var(--teal)", color: isCode ? "var(--code-green)" : "var(--p)", border: `1px solid ${isCode ? "var(--code-green)" : "transparent"}`, padding: "11px 24px", fontSize: isCode ? 13 : 16, letterSpacing: .3, cursor: disabled ? "wait" : "pointer", transition: "all .2s" }}>{children}</button>; }
 function GhostBtn({ onClick, children, isCode }) { return <button onClick={onClick} style={{ background: "transparent", color: isCode ? "var(--code-comment)" : "var(--teal)", border: `1px solid ${isCode ? "rgba(255,255,255,.15)" : "var(--teal)"}`, padding: "11px 24px", fontSize: isCode ? 13 : 16, letterSpacing: .3, cursor: "pointer", transition: "all .2s" }}>{children}</button>; }
 function ModeTab({ active, onClick, children, color, isCode }) { return <button onClick={onClick} style={{ padding: "9px 20px", background: active ? (isCode ? `${color}20` : color) : "transparent", color: active ? (isCode ? color : "var(--p)") : (isCode ? "var(--code-comment)" : "var(--inkl)"), border: "none", cursor: "pointer", fontSize: 13, transition: "all .2s" }}>{children}</button>; }
-function Panel({ label, color, side, isCode, children }) { const isL = side === "left"; return <div style={{ border: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, borderRight: isL ? "none" : `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, borderLeft: isL ? `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}` : "none", borderRadius: isL ? "4px 0 0 4px" : "0 4px 4px 0", padding: 24, minHeight: 420, background: isCode ? "#0d1117" : "transparent" }}><div style={{ fontSize: 9, letterSpacing: isCode ? 0 : 5, color, textTransform: isCode ? "none" : "uppercase", marginBottom: 18, opacity: .8 }}>{isCode ? `// ${label}` : label}</div>{children}</div>; }
-function MembraneBar({ loading, active, onTransmit, accentColor, rtl, isCode }) { return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", borderTop: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, borderBottom: `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`, padding: "24px 0", justifyContent: "center", alignSelf: "stretch", background: isCode ? "rgba(0,0,0,.2)" : "transparent" }}><div style={{ flex: 1, width: 1, background: `linear-gradient(to bottom,transparent,${isCode ? "rgba(255,255,255,.1)" : "var(--rule)"},transparent)` }} /><button onClick={onTransmit} disabled={loading || !active} style={{ width: 36, height: 36, borderRadius: "50%", background: loading ? "transparent" : active ? accentColor : (isCode ? "rgba(255,255,255,.05)" : "var(--rule)"), border: `1px solid ${active ? accentColor : (isCode ? "rgba(255,255,255,.1)" : "var(--rule)")}`, color: isCode ? (active ? "#0d1117" : "var(--code-comment)") : "var(--p)", cursor: loading || !active ? "not-allowed" : "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .3s", animation: loading ? "pulse 1.5s infinite" : "none" }}>{loading ? "○" : rtl ? "←" : "→"}</button><div style={{ flex: 1, width: 1, background: `linear-gradient(to bottom,transparent,${isCode ? "rgba(255,255,255,.1)" : "var(--rule)"},transparent)` }} /></div>; }
+function Panel({ label, color, side, isCode, children }) {
+  const isSolo = side === "solo";
+  const isL = side === "left";
+  const borderStyle = `1px solid ${isCode ? "rgba(48,54,61,1)" : "var(--rule)"}`;
+  return <div style={{ border: borderStyle, borderRight: (!isSolo && isL) ? "none" : borderStyle, borderLeft: (!isSolo && !isL) ? "none" : borderStyle, borderRadius: isSolo ? 4 : (isL ? "4px 0 0 4px" : "0 4px 4px 0"), padding: 24, minHeight: isSolo ? 0 : 420, background: isCode ? "#0d1117" : "transparent" }}><div style={{ fontSize: 9, letterSpacing: isCode ? 0 : 5, color, textTransform: isCode ? "none" : "uppercase", marginBottom: 18, opacity: .8 }}>{isCode ? `// ${label}` : label}</div>{children}</div>;
+}
+function MembraneBar({ loading, active, onTransmit, accentColor, rtl, isCode, isMobile }) {
+  const borderColor = isCode ? "rgba(48,54,61,1)" : "var(--rule)";
+  const btnStyle = { width: 36, height: 36, borderRadius: "50%", background: loading ? "transparent" : active ? accentColor : (isCode ? "rgba(255,255,255,.05)" : "var(--rule)"), border: `1px solid ${active ? accentColor : (isCode ? "rgba(255,255,255,.1)" : "var(--rule)")}`, color: isCode ? (active ? "#0d1117" : "var(--code-comment)") : "var(--p)", cursor: loading || !active ? "not-allowed" : "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .3s", animation: loading ? "pulse 1.5s infinite" : "none" };
+  if (isMobile) {
+    return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", padding: "16px 0", gap: 12, borderTop: `1px solid ${borderColor}`, borderBottom: `1px solid ${borderColor}`, background: isCode ? "rgba(0,0,0,.2)" : "transparent" }}><div style={{ flex: 1, height: 1, background: `linear-gradient(to right,transparent,${isCode ? "rgba(255,255,255,.1)" : "var(--rule)"},transparent)` }} /><button onClick={onTransmit} disabled={loading || !active} style={btnStyle}>{loading ? "○" : "↓"}</button><div style={{ flex: 1, height: 1, background: `linear-gradient(to right,transparent,${isCode ? "rgba(255,255,255,.1)" : "var(--rule)"},transparent)` }} /></div>;
+  }
+  return <div style={{ display: "flex", flexDirection: "column", alignItems: "center", borderTop: `1px solid ${borderColor}`, borderBottom: `1px solid ${borderColor}`, padding: "24px 0", justifyContent: "center", alignSelf: "stretch", background: isCode ? "rgba(0,0,0,.2)" : "transparent" }}><div style={{ flex: 1, width: 1, background: `linear-gradient(to bottom,transparent,${isCode ? "rgba(255,255,255,.1)" : "var(--rule)"},transparent)` }} /><button onClick={onTransmit} disabled={loading || !active} style={btnStyle}>{loading ? "○" : rtl ? "←" : "→"}</button><div style={{ flex: 1, width: 1, background: `linear-gradient(to bottom,transparent,${isCode ? "rgba(255,255,255,.1)" : "var(--rule)"},transparent)` }} /></div>;
+}
 function Anno({ label, color, children }) { return <div><div style={{ fontSize: 9, letterSpacing: 2, color, textTransform: "uppercase", marginBottom: 6, opacity: .75 }}>{label}</div>{children}</div>; }
 function Chips({ opts, sel, toggle, single, accent, isCode }) { return <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{opts.map(o => { const on = sel.includes(o); return <button key={o} onClick={() => toggle(o)} style={{ fontSize: 11, padding: "3px 9px", background: on ? (isCode ? `${accent}20` : `color-mix(in srgb, ${accent} 10%, transparent)`) : "transparent", border: `1px solid ${on ? accent : (isCode ? "rgba(255,255,255,.1)" : "var(--rule)")}`, borderRadius: 2, color: on ? accent : (isCode ? "var(--code-comment)" : "var(--inkf)"), cursor: "pointer", transition: "all .12s" }}>{o}</button>; })}</div>; }
 function Chip({ children, small, color, isCode }) { return <span style={{ fontSize: small ? 11 : 13, padding: "2px 7px", border: `1px solid ${color}`, color, borderRadius: 2 }}>{children}</span>; }
