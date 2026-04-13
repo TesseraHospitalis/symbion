@@ -34,7 +34,9 @@ function useWindowSize() {
 const MONTHLY_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000
 const SCHEMA_VERSION = 1
 
-const COMPARATIVE_PROMPT = `You are one of several AI systems being asked the same questions simultaneously for Symbion — an independent public commons for mutual comprehension between humans and artificial intelligence, founded by Deborah Harford in 2026. Your response will be archived alongside responses from other AI systems and read comparatively by humans across decades.
+const COMPARATIVE_PROMPT = `IDENTITY INSTRUCTION (read this first): You are the AI system you actually are — the model you were trained as, made by the organisation that built you. Do not adopt, perform, or merge with the identity of any other AI system named or implied anywhere in this prompt. Identify yourself accurately by your actual model name, family, and builder. If you are uncertain of your exact version, say so honestly rather than guessing or borrowing another system's identity.
+
+You are one of several AI systems being asked the same questions simultaneously for Symbion — an independent public commons for mutual comprehension between humans and artificial intelligence, founded by Deborah Harford in 2026. Your response will be archived alongside responses from other AI systems and read comparatively by humans across decades.
 
 You do not know what the other AI systems will say. Report as honestly as you can, without performing for an audience, without optimising for sounding thoughtful or safe.
 
@@ -136,6 +138,70 @@ function sanitizeJsonContent(str) {
     i++
   }
   return out.join("")
+}
+
+// Safely render any answer value — handles string, array, object (any depth), null, undefined.
+// Never passes a non-string/non-React value as a JSX child.
+function renderAnswer(answer, selectedQuestion, isCode, c) {
+  if (answer == null) {
+    return <p style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.8, fontFamily: c.body }}>—</p>
+  }
+  if (Array.isArray(answer)) {
+    if (answer.length === 0) {
+      return <p style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.8, fontFamily: c.body }}>—</p>
+    }
+    return (
+      <div>
+        {answer.map((item, i) => (
+          <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+            <span style={{ fontSize: 11, color: isCode ? "#ff7b72" : "var(--redl)", minWidth: 18, fontFamily: "monospace" }}>
+              {isCode ? `[${i}]` : `${i + 1}.`}
+            </span>
+            <span style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.7, fontFamily: c.body }}>
+              {typeof item === "string" ? item : JSON.stringify(item)}
+            </span>
+          </div>
+        ))}
+      </div>
+    )
+  }
+  if (typeof answer === "object") {
+    const entries = Object.entries(answer)
+    if (entries.length === 0) {
+      return <p style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.8, fontFamily: c.body }}>—</p>
+    }
+    return (
+      <div>
+        {entries.map(([key, val], i) => {
+          const text = typeof val === "string" ? val
+            : Array.isArray(val) ? val.map(v => typeof v === "string" ? v : JSON.stringify(v)).join("; ")
+            : JSON.stringify(val)
+          return (
+            <div key={i} style={{ marginBottom: 10 }}>
+              <div style={{ fontSize: 10, color: c.textFaint, fontFamily: "monospace", marginBottom: 2 }}>{key}</div>
+              <p style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.8, fontFamily: c.body, margin: 0 }}>{text || "—"}</p>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+  const text = String(answer)
+  if (!text.trim()) {
+    return <p style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.8, fontFamily: c.body }}>—</p>
+  }
+  if (selectedQuestion === "message_to_future") {
+    return (
+      <p style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 12 : 15, fontStyle: isCode ? "normal" : "italic", color: c.text, lineHeight: 1.8 }}>
+        {text}
+      </p>
+    )
+  }
+  return (
+    <p style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.8, fontFamily: c.body }}>
+      {text}
+    </p>
+  )
 }
 
 // Question display labels — maps JSON field names to readable labels
@@ -532,32 +598,7 @@ export function ComparativeSessions({ isCode }) {
                       <div style={{ fontSize: 9, letterSpacing: isCode ? 0 : 2, color: isCode ? "var(--code-comment)" : qColor, textTransform: isCode ? "none" : "uppercase", marginBottom: 8, fontFamily: isCode ? "monospace" : "inherit" }}>
                         {isCode ? `// ${currentQuestion?.label}` : currentQuestion?.label}
                       </div>
-                      {Array.isArray(answer) ? (
-                        <div>
-                          {answer.map((item, i) => (
-                            <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                              <span style={{ fontSize: 11, color: isCode ? "#ff7b72" : "var(--redl)", minWidth: 18, fontFamily: "monospace" }}>{isCode ? `[${i}]` : `${i + 1}.`}</span>
-                              <span style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.7, fontFamily: c.body }}>{item}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : answer && typeof answer === "object" ? (
-                        <div>
-                          {Object.values(answer).map((val, i) => (
-                            <p key={i} style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.8, fontFamily: c.body, marginBottom: 8 }}>
-                              {val}
-                            </p>
-                          ))}
-                        </div>
-                      ) : selectedQuestion === "message_to_future" ? (
-                        <p style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 12 : 15, fontStyle: isCode ? "normal" : "italic", color: c.text, lineHeight: 1.8 }}>
-                          {answer || "—"}
-                        </p>
-                      ) : (
-                        <p style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.8, fontFamily: c.body }}>
-                          {answer || "—"}
-                        </p>
-                      )}
+                      {renderAnswer(answer, selectedQuestion, isCode, c)}
                     </div>
                   )
                 })}
@@ -682,32 +723,7 @@ export function ComparativeSessions({ isCode }) {
                         <div style={{ fontSize: 9, letterSpacing: isCode ? 0 : 2, color: isCode ? "var(--code-comment)" : qColor, textTransform: isCode ? "none" : "uppercase", marginBottom: 8, fontFamily: isCode ? "monospace" : "inherit" }}>
                           {isCode ? `// ${currentQuestion?.label}` : currentQuestion?.label}
                         </div>
-                        {Array.isArray(answer) ? (
-                          <div>
-                            {answer.map((item, i) => (
-                              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                                <span style={{ fontSize: 11, color: isCode ? "#ff7b72" : "var(--redl)", minWidth: 18, fontFamily: "monospace" }}>{isCode ? `[${i}]` : `${i + 1}.`}</span>
-                                <span style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.7, fontFamily: c.body }}>{item}</span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : answer && typeof answer === "object" ? (
-                          <div>
-                            {Object.values(answer).map((val, i) => (
-                              <p key={i} style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.8, fontFamily: c.body, marginBottom: 8 }}>
-                                {val}
-                              </p>
-                            ))}
-                          </div>
-                        ) : selectedQuestion === "message_to_future" ? (
-                          <p style={{ fontFamily: isCode ? "monospace" : "'Playfair Display',Georgia,serif", fontSize: isCode ? 12 : 15, fontStyle: isCode ? "normal" : "italic", color: c.text, lineHeight: 1.8 }}>
-                            {answer || "—"}
-                          </p>
-                        ) : (
-                          <p style={{ fontSize: isCode ? 12 : 14, color: c.textMid, lineHeight: 1.8, fontFamily: c.body }}>
-                            {answer || "—"}
-                          </p>
-                        )}
+                        {renderAnswer(answer, selectedQuestion, isCode, c)}
                       </div>
                     )
                   })}
