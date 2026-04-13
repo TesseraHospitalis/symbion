@@ -1053,7 +1053,7 @@ function Archive({ t, isCode }) {
             </div>
             <div style={{ width: 1, background: isCode ? "rgba(48,54,61,1)" : "var(--rulef)", alignSelf: "stretch" }} />
             <div>
-              <p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-text)" : "var(--ink)", lineHeight: 1.6, marginBottom: 6 }}>
+              <p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-text)" : "var(--ink)", lineHeight: 1.6, marginBottom: 6, whiteSpace: "pre-wrap" }}>
                 {(() => { const text = s.mode === "h2a" ? s.message : s.mode === "a2h" ? s.aiText : s.mode === "self" ? s.response?.message_to_future : s.mode === "comparative" ? s.response?.model_identity : (s.response?.message_to_future || s.response?.model_identity || "Signal archived"); return selected === i ? `"${text}"` : `"${text?.slice(0, 110)}…"`; })()}
               </p>
               <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
@@ -1066,8 +1066,12 @@ function Archive({ t, isCode }) {
           {selected === i && s.response && (
             <div style={{ paddingBottom: 24, borderTop: `1px solid ${isCode ? "rgba(48,54,61,.5)" : "var(--rulef)"}`, paddingTop: 18, animation: "fadeIn .3s ease" }}>
               {s.mode === "h2a" && <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 18 }}>
-                <div><AL color={isCode ? "var(--code-green)" : "var(--tealm)"} isCode={isCode}>Bridge Phrase</AL><p style={{ fontSize: isCode ? 13 : 15, fontStyle: isCode ? "normal" : "italic", color: isCode ? "var(--code-text)" : "var(--ink)", lineHeight: 1.7 }}>{s.response.bridge_phrase}</p></div>
-                <div><AL color={isCode ? "var(--code-blue)" : "var(--amberl)"} isCode={isCode}>What May Be Lost</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7 }}>{s.response.uncertainty}</p></div>
+                {s.response.literal_interpretation && <div style={{ gridColumn: "1/-1" }}><AL color={isCode ? "var(--code-comment)" : "var(--inkf)"} isCode={isCode}>Literal Interpretation</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{s.response.literal_interpretation}</p></div>}
+                {s.response.detected_values && s.response.detected_values.length > 0 && <div style={{ gridColumn: "1/-1" }}><AL color={isCode ? "var(--code-blue)" : "var(--amberl)"} isCode={isCode}>Detected Values</AL><div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>{(Array.isArray(s.response.detected_values) ? s.response.detected_values : [s.response.detected_values]).map((v, vi) => <Chip key={vi} small color={isCode ? "var(--code-blue)" : "var(--amberl)"} isCode={isCode}>{v}</Chip>)}</div></div>}
+                {s.response.bridge_phrase && <div style={{ gridColumn: "1/-1" }}><AL color={isCode ? "var(--code-green)" : "var(--tealm)"} isCode={isCode}>Bridge Phrase</AL><p style={{ fontSize: isCode ? 13 : 15, fontStyle: isCode ? "normal" : "italic", color: isCode ? "var(--code-text)" : "var(--ink)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{s.response.bridge_phrase}</p></div>}
+                {s.response.uncertainty && <div><AL color={isCode ? "var(--code-blue)" : "var(--amberl)"} isCode={isCode}>What May Be Lost</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{s.response.uncertainty}</p></div>}
+                {s.response.temporal_echo && <div><AL color={isCode ? "var(--violetf)" : "var(--violetm)"} isCode={isCode}>Temporal Echo</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{s.response.temporal_echo}</p></div>}
+                {s.response.code_translation && <div style={{ gridColumn: "1/-1" }}><AL color={isCode ? "var(--code-green)" : "var(--tealm)"} isCode={isCode}>Code Translation</AL><pre style={{ fontSize: isCode ? 12 : 13, color: isCode ? "var(--code-text)" : "var(--ink)", lineHeight: 1.7, whiteSpace: "pre-wrap", fontFamily: "monospace", margin: 0 }}>{s.response.code_translation}</pre></div>}
               </div>}
               {s.mode === "a2h" && <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 18 }}>
                 <div><AL color={isCode ? "var(--code-green)" : "var(--tealm)"} isCode={isCode}>Gap Analysis</AL><p style={{ fontSize: isCode ? 13 : 15, color: isCode ? "var(--code-comment)" : "var(--inkl)", lineHeight: 1.7 }}>{s.response.gap_analysis}</p></div>
