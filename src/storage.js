@@ -15,7 +15,7 @@ export const storage = {
         .from('metadata')
         .insert({ key, value: parsed })
       if (insertError) {
-        if (insertError.code === '23505') {
+        if (insertError.code === '23505' || insertError.code === '409') {
           const { error: updateError } = await supabase
             .from('metadata')
             .update({ value: parsed })

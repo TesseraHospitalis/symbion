@@ -344,10 +344,14 @@ async function runSelfReport(force = false) {
       timestamp: new Date().toISOString()
     };
     const key = `signal:self:${Date.now()}`;
-    await window.storage.set(key, JSON.stringify(record), true);
-    await window.storage.set("meta:last_self_report", JSON.stringify({ timestamp: record.timestamp, key }), true);
+    try {
+      await window.storage.set(key, JSON.stringify(record), true);
+    } catch (e) { console.error('Signal save error:', e); }
+    try {
+      await window.storage.set("meta:last_self_report", JSON.stringify({ timestamp: record.timestamp, key }), true);
+    } catch (e) { console.error('Metadata save error:', e); }
     return record;
-} catch (e) { console.error('Self report error:', e); return null; }
+  } catch (e) { console.error('Self report error:', e); return null; }
 }
 
 function injectStyles() {
